@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
 
 @Component
@@ -19,9 +20,19 @@ public class DefaultPlaylistExportHandler implements PlaylistExportHandler {
     @Autowired
     MediaFileDao mediaFileDao;
 
+    private boolean exportForMobile;
+
     @Override
     public boolean canHandle(Class<? extends SpecificPlaylistProvider> providerClass) {
         return true;
+    }
+
+    public boolean getExportForMobile() {
+        return exportForMobile;
+    }
+
+    public void setExportForMobile(boolean exportForMobile) {
+        this.exportForMobile = exportForMobile;
     }
 
     @Override
@@ -33,9 +44,17 @@ public class DefaultPlaylistExportHandler implements PlaylistExportHandler {
     Playlist createChameleonGenericPlaylistFromDBId(int id) {
         Playlist newPlaylist = new Playlist();
         List<MediaFile> files = mediaFileDao.getFilesInPlaylist(id);
+
         files.forEach(file -> {
             Media component = new Media();
-            Content content = new Content(file.getPath());
+            Content content = null;
+            if(exportForMobile) {
+                File filePath = new File(file.getPath());
+                String path = ".." + filePath.getParent().replace(file.getFolder(), "").replace("\\", "/") + "/" + String.format("%02d", file.getTrackNumber()) + "-" + file.getTitle() + "." + file.getFormat();
+                content = new Content(path);
+            }else {
+                content = new Content(file.getPath());
+            }
             component.setSource(content);
             newPlaylist.getRootSequence().addComponent(component);
         });

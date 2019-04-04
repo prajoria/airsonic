@@ -24,14 +24,13 @@ import chameleon.playlist.SpecificPlaylistFactory;
 import chameleon.playlist.SpecificPlaylistProvider;
 import org.airsonic.player.dao.MediaFileDao;
 import org.airsonic.player.dao.PlaylistDao;
-import org.airsonic.player.domain.MediaFile;
-import org.airsonic.player.domain.PlayQueue;
-import org.airsonic.player.domain.Playlist;
-import org.airsonic.player.domain.User;
+import org.airsonic.player.domain.*;
+import org.airsonic.player.service.playlist.DefaultPlaylistExportHandler;
 import org.airsonic.player.service.playlist.PlaylistExportHandler;
 import org.airsonic.player.service.playlist.PlaylistImportHandler;
 import org.airsonic.player.util.Pair;
 import org.airsonic.player.util.StringUtil;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -44,6 +43,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -234,6 +237,15 @@ public class PlaylistService {
         specificPlaylist.writeTo(out, StringUtil.ENCODING_UTF8);
     }
 
+    public void exportMobilePlaylist(int id, OutputStream out) throws Exception {
+        String format = settingsService.getPlaylistExportFormat();
+        SpecificPlaylistProvider provider = SpecificPlaylistFactory.getInstance().findProviderById(format);
+        PlaylistExportHandler handler = getExportHandler(provider);
+        handler.setExportForMobile(true);
+        SpecificPlaylist specificPlaylist = handler.handle(id, provider);
+        specificPlaylist.writeTo(out, StringUtil.ENCODING_UTF8);
+    }
+
     private PlaylistImportHandler getImportHandler(SpecificPlaylist playlist) {
         return importHandlers.stream()
                              .filter(handler -> handler.canHandle(playlist.getClass()))
@@ -258,6 +270,40 @@ public class PlaylistService {
             LOG.info("Completed playlist import.");
         } catch (Throwable x) {
             LOG.warn("Failed to import playlists: " + x, x);
+        }
+    }
+
+    public void importPlaylistsFromMediaFolder() {
+        try {
+            LOG.info("Starting playlist import.");
+            doImportPlaylistsFromMediaFolder();
+            LOG.info("Completed playlist import.");
+        } catch (Throwable x) {
+            LOG.warn("Failed to import playlists: " + x, x);
+        }
+    }
+
+    private void doImportPlaylistsFromMediaFolder() throws Exception {
+
+        List<File> playlistFiles = new ArrayList<File>();
+        for (MusicFolder musicFolder : settingsService.getAllMusicFolders()) {
+            File filename = new File(musicFolder.getPath().toString());
+            String []exts = {"m3u", "m3u8"};
+            for (File file: FileUtils.listFiles(filename, exts, true)) {
+                LOG.info("Playlist file: " + file);
+                playlistFiles.add(file);
+            }
+            //MediaFile root = mediaFileService.getMediaFile(musicFolder.getPath(), false);
+           // scanFile(root, musicFolder, lastScanned, albumCount, genres, false);
+        }
+
+        List<Playlist> allPlaylists = playlistDao.getAllPlaylists();
+        for (File file : playlistFiles) {
+            try {
+                importPlaylistIfUpdated(file, allPlaylists);
+            } catch (Exception x) {
+                LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
+            }
         }
     }
 

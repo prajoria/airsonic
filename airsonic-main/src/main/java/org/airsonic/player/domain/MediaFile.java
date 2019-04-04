@@ -477,6 +477,7 @@ public class MediaFile {
         AUDIOBOOK,
         VIDEO,
         DIRECTORY,
-        ALBUM
+        ALBUM,
+        MUSIC_PLAYLIST
     }
 }

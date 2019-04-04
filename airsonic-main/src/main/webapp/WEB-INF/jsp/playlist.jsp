@@ -86,8 +86,8 @@
                 $("#empty").hide();
             }
 
-            $("#songCount").text(playlist.fileCount);
-            $("#duration").text(playlist.durationAsString);
+            $("#songCount").html(playlist.fileCount);
+            $("#duration").html(playlist.durationAsString);
 
             if (playlist.shared) {
                 $("#shared").html("<fmt:message key="playlist2.shared"/>");
@@ -113,15 +113,15 @@
                 if (!song.present) {
                     $("#missing" + id).show();
                 }
-                $("#index" + id).text(id);
-                $("#title" + id).text(song.title);
+                $("#index" + id).html(id);
+                $("#title" + id).html(song.title);
                 $("#title" + id).attr("title", song.title);
-                $("#album" + id).text(song.album);
+                $("#album" + id).html(song.album);
                 $("#album" + id).attr("title", song.album);
                 $("#albumUrl" + id).attr("href", "main.view?id=" + song.id);
-                $("#artist" + id).text(song.artist);
+                $("#artist" + id).html(song.artist);
                 $("#artist" + id).attr("title", song.artist);
-                $("#songDuration" + id).text(song.durationAsString);
+                $("#songDuration" + id).html(song.durationAsString);
 
                 // Note: show() method causes page to scroll to top.
                 $("#pattern" + id).css("display", "table-row");
@@ -199,8 +199,9 @@
         | <span class="header"><a href="javascript:void(0)" onclick="onDeletePlaylist();"><fmt:message key="common.delete"/></a></span>
     </c:if>
     <c:url value="exportPlaylist.view" var="exportUrl"><c:param name="id" value="${model.playlist.id}"/></c:url>
-    | <span class="header"><a href="${exportUrl}"><fmt:message key="playlist2.export"/></a></span>
-
+    <c:url value="exportMobilePlaylist.view" var="exportMobileUrl"><c:param name="id" value="${model.playlist.id}"/></c:url>
+    <span class="header"><a href="${exportUrl}"><fmt:message key="playlist2.export"/></a></span>
+    <span class="header"><a href="${exportMobileUrl}">Export Mobile Playlist</a></span>
 </h2>
 
 <div id="comment" class="detail" style="padding-top:0.2em">${fn:escapeXml(model.playlist.comment)}</div>

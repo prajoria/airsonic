@@ -4,6 +4,7 @@ import de.triology.recaptchav2java.ReCaptcha;
 import org.airsonic.player.domain.User;
 import org.airsonic.player.service.SecurityService;
 import org.airsonic.player.service.SettingsService;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,10 +36,6 @@ public class RecoverController {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(RecoverController.class);
-
-    private static final String SYMBOLS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    private final SecureRandom random = new SecureRandom();
-    private static final int PASSWORD_LENGTH = 32;
 
     @Autowired
     private SettingsService settingsService;
@@ -73,13 +69,7 @@ public class RecoverController {
             } else if (user.getEmail() == null) {
                 map.put("error", "recover.error.noemail");
             } else {
-                StringBuilder sb = new StringBuilder(PASSWORD_LENGTH);
-                for(int i=0; i<PASSWORD_LENGTH; i++) {
-                  int index = random.nextInt(SYMBOLS.length());
-                  sb.append(SYMBOLS.charAt(index));
-                }
-                String password = sb.toString();
-
+                String password = RandomStringUtils.randomAlphanumeric(8);
                 if (emailPassword(password, user.getUsername(), user.getEmail())) {
                     map.put("sentTo", user.getEmail());
                     user.setLdapAuthenticated(false);

@@ -3,6 +3,8 @@
 <html><head>
     <%@ include file="head.jsp" %>
     <%@ include file="jquery.jsp" %>
+    <script type="text/javascript" src="<c:url value="/script/moment-2.18.1.min.js"/>"></script>
+    <link type="text/css" rel="stylesheet" href="<c:url value="/script/webfx/luna.css"/>">
     <script type="text/javascript" src="<c:url value="/script/scripts-2.0.js"/>"></script>
     <script type="text/javascript" src="<c:url value="/dwr/interface/nowPlayingService.js"/>"></script>
     <script type="text/javascript" src="<c:url value="/dwr/interface/playQueueService.js"/>"></script>
@@ -11,6 +13,7 @@
     <script type="text/javascript" src="<c:url value="/dwr/util.js"/>"></script>
     <script type="text/javascript" src="<c:url value="/script/mediaelement/mediaelement-and-player.min.js"/>"></script>
     <%@ include file="playQueueCast.jsp" %>
+    <link type="text/css" rel="stylesheet" href="<c:url value="/script/webfx/luna.css"/>">
     <style type="text/css">
         .ui-slider .ui-slider-handle {
             width: 11px;
@@ -427,7 +430,7 @@
         }
 
         if (songs.length == 0) {
-            $("#songCountAndDuration").text("");
+            $("#songCountAndDuration").html("");
             $("#empty").show();
         } else {
             $("#songCountAndDuration").html(songs.length + " <fmt:message key="playlist2.songs"/> &ndash; " + playQueue.durationAsString);
@@ -445,7 +448,7 @@
             var id = i + 1;
             dwr.util.cloneNode("pattern", { idSuffix:id });
             if ($("#trackNumber" + id)) {
-                $("#trackNumber" + id).text(song.trackNumber);
+                $("#trackNumber" + id).html(song.trackNumber);
             }
             if (song.starred) {
                 $("#starSong" + id).attr("src", "<spring:theme code='ratingOnImage'/>");
@@ -459,40 +462,40 @@
                 }
             }
             if ($("#title" + id)) {
-                $("#title" + id).text(song.title);
+                $("#title" + id).html(song.title);
                 $("#title" + id).attr("title", song.title);
             }
             if ($("#titleUrl" + id)) {
-                $("#titleUrl" + id).text(song.title);
+                $("#titleUrl" + id).html(song.title);
                 $("#titleUrl" + id).attr("title", song.title);
                 $("#titleUrl" + id).click(function () {onSkip(this.id.substring(8) - 1)});
             }
             if ($("#album" + id)) {
-                $("#album" + id).text(song.album);
+                $("#album" + id).html(song.album);
                 $("#album" + id).attr("title", song.album);
                 $("#albumUrl" + id).attr("href", song.albumUrl);
             }
             if ($("#artist" + id)) {
-                $("#artist" + id).text(song.artist);
+                $("#artist" + id).html(song.artist);
                 $("#artist" + id).attr("title", song.artist);
             }
             if ($("#genre" + id)) {
-                $("#genre" + id).text(song.genre);
+                $("#genre" + id).html(song.genre);
             }
             if ($("#year" + id)) {
-                $("#year" + id).text(song.year);
+                $("#year" + id).html(song.year);
             }
             if ($("#bitRate" + id)) {
-                $("#bitRate" + id).text(song.bitRate);
+                $("#bitRate" + id).html(song.bitRate);
             }
             if ($("#duration" + id)) {
-                $("#duration" + id).text(song.durationAsString);
+                $("#duration" + id).html(song.durationAsString);
             }
             if ($("#format" + id)) {
-                $("#format" + id).text(song.format);
+                $("#format" + id).html(song.format);
             }
             if ($("#fileSize" + id)) {
-                $("#fileSize" + id).text(song.fileSize);
+                $("#fileSize" + id).html(song.fileSize);
             }
 
             $("#pattern" + id).addClass((i % 2 == 0) ? "bgcolor1" : "bgcolor2");

@@ -265,7 +265,13 @@ public class MusicIndexService {
                 indexB = Integer.MAX_VALUE;
             }
 
-            return Integer.compare(indexA, indexB);
+            if (indexA < indexB) {
+                return -1;
+            }
+            if (indexA > indexB) {
+                return 1;
+            }
+            return 0;
         }
     }
 }

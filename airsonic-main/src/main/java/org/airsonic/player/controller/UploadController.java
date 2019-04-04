@@ -166,7 +166,9 @@ public class UploadController {
     private void unzip(File file, List<File> unzippedFiles) throws Exception {
         LOG.info("Unzipping " + file);
 
-        try (ZipFile zipFile = new ZipFile(file)) {
+        ZipFile zipFile = new ZipFile(file);
+
+        try {
 
             Enumeration<?> entries = zipFile.entries();
 
@@ -208,6 +210,8 @@ public class UploadController {
             zipFile.close();
             file.delete();
 
+        } finally {
+            zipFile.close();
         }
     }
 

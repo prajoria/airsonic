@@ -108,6 +108,11 @@
             <td><div class="forward"><a href="musicFolderSettings.view?scanNow"><fmt:message key="musicfoldersettings.scannow"/></a></div></td>
             <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanMediaFolders"/></c:import></td>
         </tr>
+        <tr>
+            <td><div class="forward"><a href="musicFolderSettings.view?scanPlaylistNow">Scan Playlists</a></div></td>
+
+            <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanMediaFolders"/></c:import></td>
+        </tr>
     </table>
 
     <c:if test="${command.scanning}">
@@ -139,7 +144,7 @@
 
     <p >
         <input type="submit" value="<fmt:message key="common.save"/>" style="margin-right:0.3em">
-        <a href='nowPlaying.view'><input type="button" value="<fmt:message key="common.cancel"/>"></a>
+        <input type="button" value="<fmt:message key="common.cancel"/>" onclick="location.href='nowPlaying.view'">
     </p>
 
 </form:form>

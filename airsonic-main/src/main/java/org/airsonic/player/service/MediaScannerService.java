@@ -164,6 +164,30 @@ public class MediaScannerService {
         thread.start();
     }
 
+    /**
+     * Scans the media library.
+     * The scanning is done asynchronously, i.e., this method returns immediately.
+     */
+    public synchronized void scanPlaylistLibrary() {
+        if (isScanning()) {
+            return;
+        }
+        scanning = true;
+
+        Thread thread = new Thread("MediaLibraryScanner") {
+            @Override
+            public void run() {
+               // doScanLibrary();
+                playlistService.importPlaylistsFromMediaFolder();
+                mediaFileDao.checkpoint();
+            }
+        };
+
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+    }
+
+
     private void doScanLibrary() {
         LOG.info("Starting to scan media library.");
         Date lastScanned = DateUtils.truncate(new Date(), Calendar.SECOND);

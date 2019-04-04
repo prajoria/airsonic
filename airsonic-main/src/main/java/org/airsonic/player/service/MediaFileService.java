@@ -347,6 +347,10 @@ public class MediaFileService {
     /**
      * Returns random songs matching search criteria.
      *
+     * @param criteria Random search criteria.
+     * @param count    Max number of songs to return.
+     * @return Random songs
+     * @see SearchService.getRandomSongs
      */
     public List<MediaFile> getRandomSongs(RandomSearchCriteria criteria, String username) {
         return mediaFileDao.getRandomSongs(criteria, username);
@@ -396,8 +400,13 @@ public class MediaFileService {
         List<File> children = filterMediaFiles(FileUtil.listFiles(parent.getFile()));
         for (File child : children) {
             if (storedChildrenMap.remove(child.getPath()) == null) {
-                // Add children that are not already stored.
-                mediaFileDao.createOrUpdateMediaFile(createMediaFile(child));
+                try {
+                    // Add children that are not already stored.
+                    mediaFileDao.createOrUpdateMediaFile(createMediaFile(child));
+                }catch(Exception e)
+                {
+                    LOG.error("Failed to create entry for " + child + e);
+                }
             }
         }
 
@@ -415,11 +424,13 @@ public class MediaFileService {
     public List<File> filterMediaFiles(File[] candidates) {
         List<File> result = new ArrayList<File>();
         for (File candidate : candidates) {
+
             String suffix = FilenameUtils.getExtension(candidate.getName()).toLowerCase();
             if (!isExcluded(candidate) && (FileUtil.isDirectory(candidate) || isAudioFile(suffix) || isVideoFile(suffix))) {
                 result.add(candidate);
             }
         }
+
         return result;
     }
 
@@ -482,34 +493,40 @@ public class MediaFileService {
         mediaFile.setPresent(true);
 
         if (file.isFile()) {
+            if(file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith(".m3u") || file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith(".m3u8"))
+            {
+                mediaFile.setMediaType(MediaFile.MediaType.MUSIC_PLAYLIST);
+            }else {
 
-            MetaDataParser parser = metaDataParserFactory.getParser(file);
-            if (parser != null) {
-                MetaData metaData = parser.getMetaData(file);
-                mediaFile.setArtist(metaData.getArtist());
-                mediaFile.setAlbumArtist(metaData.getAlbumArtist());
-                mediaFile.setAlbumName(metaData.getAlbumName());
-                mediaFile.setTitle(metaData.getTitle());
-                mediaFile.setDiscNumber(metaData.getDiscNumber());
-                mediaFile.setTrackNumber(metaData.getTrackNumber());
-                mediaFile.setGenre(metaData.getGenre());
-                mediaFile.setYear(metaData.getYear());
-                mediaFile.setDurationSeconds(metaData.getDurationSeconds());
-                mediaFile.setBitRate(metaData.getBitRate());
-                mediaFile.setVariableBitRate(metaData.getVariableBitRate());
-                mediaFile.setHeight(metaData.getHeight());
-                mediaFile.setWidth(metaData.getWidth());
-                mediaFile.setMusicBrainzReleaseId(metaData.getMusicBrainzReleaseId());
+                MetaDataParser parser = metaDataParserFactory.getParser(file);
+                if (parser != null) {
+                    MetaData metaData = parser.getMetaData(file);
+                    mediaFile.setArtist(metaData.getArtist());
+                    mediaFile.setAlbumArtist(metaData.getAlbumArtist());
+                    mediaFile.setAlbumName(metaData.getAlbumName());
+                    mediaFile.setTitle(metaData.getTitle());
+                    mediaFile.setDiscNumber(metaData.getDiscNumber());
+                    mediaFile.setTrackNumber(metaData.getTrackNumber());
+                    mediaFile.setGenre(metaData.getGenre());
+                    mediaFile.setYear(metaData.getYear());
+                    mediaFile.setDurationSeconds(metaData.getDurationSeconds());
+                    mediaFile.setBitRate(metaData.getBitRate());
+                    mediaFile.setVariableBitRate(metaData.getVariableBitRate());
+                    mediaFile.setHeight(metaData.getHeight());
+                    mediaFile.setWidth(metaData.getWidth());
+                    mediaFile.setMusicBrainzReleaseId(metaData.getMusicBrainzReleaseId());
+                }
+                String format = StringUtils.trimToNull(StringUtils.lowerCase(FilenameUtils.getExtension(mediaFile.getPath())));
+                mediaFile.setFormat(format);
+                mediaFile.setFileSize(FileUtil.length(file));
+                mediaFile.setMediaType(getMediaType(mediaFile));
             }
-            String format = StringUtils.trimToNull(StringUtils.lowerCase(FilenameUtils.getExtension(mediaFile.getPath())));
-            mediaFile.setFormat(format);
-            mediaFile.setFileSize(FileUtil.length(file));
-            mediaFile.setMediaType(getMediaType(mediaFile));
 
         } else {
 
             // Is this an album?
             if (!isRoot(mediaFile)) {
+                LOG.info("Listing dir " + file);
                 File[] children = FileUtil.listFiles(file);
                 File firstChild = null;
                 for (File child : filterMediaFiles(children)) {

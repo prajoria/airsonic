@@ -368,8 +368,9 @@ public class DownloadController implements LastModified {
      */
     private long computeCrc(File file) throws IOException {
         CRC32 crc = new CRC32();
+        InputStream in = new FileInputStream(file);
 
-        try (InputStream in = new FileInputStream(file)) {
+        try {
 
             byte[] buf = new byte[8192];
             int n = in.read(buf);
@@ -378,6 +379,8 @@ public class DownloadController implements LastModified {
                 n = in.read(buf);
             }
 
+        } finally {
+            in.close();
         }
 
         return crc.getValue();

@@ -22,6 +22,7 @@ package org.airsonic.player.command;
 import org.airsonic.player.controller.SearchController;
 import org.airsonic.player.domain.MediaFile;
 import org.airsonic.player.domain.Player;
+import org.airsonic.player.domain.Playlist;
 import org.airsonic.player.domain.User;
 
 import java.util.List;
@@ -37,6 +38,9 @@ public class SearchCommand {
     private List<MediaFile> artists;
     private List<MediaFile> albums;
     private List<MediaFile> songs;
+
+    private List<Playlist> playlists;
+
     private boolean isIndexBeingCreated;
     private User user;
     private boolean partyModeEnabled;
@@ -80,6 +84,14 @@ public class SearchCommand {
 
     public void setSongs(List<MediaFile> songs) {
         this.songs = songs;
+    }
+
+    public List<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(List<Playlist> playlists) {
+        this.playlists = playlists;
     }
 
     public User getUser() {

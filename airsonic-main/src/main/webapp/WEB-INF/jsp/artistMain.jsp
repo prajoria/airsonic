@@ -97,15 +97,15 @@
                     } else {
                         $("#starSong" + id).attr("src", "<spring:theme code='ratingOffImage'/>");
                     }
-                    $("#rank" + id).text(i + 1);
-                    $("#title" + id).text(song.title);
+                    $("#rank" + id).html(i + 1);
+                    $("#title" + id).html(song.title);
                     $("#title" + id).attr("title", song.title);
-                    $("#album" + id).text(song.album);
+                    $("#album" + id).html(song.album);
                     $("#album" + id).attr("title", song.album);
                     $("#albumUrl" + id).attr("href", "main.view?id=" + song.id);
-                    $("#artist" + id).text(song.artist);
+                    $("#artist" + id).html(song.artist);
                     $("#artist" + id).attr("title", song.artist);
-                    $("#songDuration" + id).text(song.durationAsString);
+                    $("#songDuration" + id).html(song.durationAsString);
 
                     // Note: show() method causes page to scroll to top.
                     $("#pattern" + id).css("display", "table-row");

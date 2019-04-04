@@ -161,7 +161,7 @@ public class JaudiotaggerParser extends MetaDataParser {
         Integer result = null;
 
         try {
-            result = Integer.valueOf(trackNumber);
+            result = new Integer(trackNumber);
         } catch (NumberFormatException x) {
             Matcher matcher = TRACK_NUMBER_PATTERN.matcher(trackNumber);
             if (matcher.matches()) {
@@ -187,7 +187,7 @@ public class JaudiotaggerParser extends MetaDataParser {
         Integer result = null;
 
         try {
-            result = Integer.valueOf(year);
+            result = new Integer(year);
         } catch (NumberFormatException x) {
             Matcher matcher = YEAR_NUMBER_PATTERN.matcher(year);
             if (matcher.matches()) {

@@ -106,9 +106,8 @@ public class PlayerSettingsController  {
         command.setAdmin(user.isAdminRole());
 
         command.setJavaJukeboxMixers(Arrays.stream(AudioSystemUtils.listAllMixers()).map(info -> info.getName()).toArray(String[]::new));
-        if (player != null) {
-            command.setJavaJukeboxMixer(player.getJavaJukeboxMixer());
-        }
+        command.setJavaJukeboxMixer(player.getJavaJukeboxMixer());
+
         model.addAttribute("command",command);
     }
 

@@ -35,6 +35,16 @@ public class XspfPlaylistExportHandler implements PlaylistExportHandler {
         return playlist;
     }
 
+    @Override
+    public boolean getExportForMobile() {
+        return false;
+    }
+
+    @Override
+    public void setExportForMobile(boolean exportForMobile) {
+
+    }
+
     chameleon.playlist.xspf.Playlist createXsfpPlaylistFromDBId(int id) {
         chameleon.playlist.xspf.Playlist newPlaylist = new chameleon.playlist.xspf.Playlist();
         Playlist playlist = playlistDao.getPlaylist(id);

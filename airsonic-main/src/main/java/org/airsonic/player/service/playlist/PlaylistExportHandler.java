@@ -8,4 +8,7 @@ public interface PlaylistExportHandler extends Ordered {
     boolean canHandle(Class<? extends SpecificPlaylistProvider> providerClass);
 
     SpecificPlaylist handle(int id, SpecificPlaylistProvider provider) throws Exception;
+    public boolean getExportForMobile();
+
+    public void setExportForMobile(boolean exportForMobile);
 }

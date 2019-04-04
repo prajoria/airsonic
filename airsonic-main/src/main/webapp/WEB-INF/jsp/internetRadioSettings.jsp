@@ -49,7 +49,7 @@
     <tr>
         <td style="padding-top:1.5em" colspan="5">
             <input type="submit" value="<fmt:message key="common.save"/>" style="margin-right:0.3em">
-            <a href='nowPlaying.view'><input type="button" value="<fmt:message key="common.cancel"/>"></a>
+            <input type="button" value="<fmt:message key="common.cancel"/>" onclick="location.href='nowPlaying.view'">
         </td>
     </tr>
 </table>

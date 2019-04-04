@@ -70,6 +70,7 @@ public class MusicFolderSettingsController {
 
     @ModelAttribute
     protected void formBackingObject(@RequestParam(value = "scanNow",required = false) String scanNow,
+                                     @RequestParam(value = "scanPlaylistNow",required = false) String scanPlaylistNow,
                                        @RequestParam(value = "expunge",required = false) String expunge,
                                        Model model) throws Exception {
         MusicFolderSettingsCommand command = new MusicFolderSettingsCommand();
@@ -78,6 +79,11 @@ public class MusicFolderSettingsController {
             settingsService.clearMusicFolderCache();
             mediaScannerService.scanLibrary();
         }
+        if (scanPlaylistNow != null) {
+            settingsService.clearMusicFolderCache();
+            mediaScannerService.scanPlaylistLibrary();
+        }
+
         if (expunge != null) {
             expunge();
         }
@@ -94,6 +100,7 @@ public class MusicFolderSettingsController {
 
         model.addAttribute("command",command);
     }
+
 
 
     private void expunge() {
