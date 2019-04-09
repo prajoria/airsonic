@@ -22,6 +22,7 @@ package org.airsonic.player.service;
 import org.airsonic.player.dao.AlbumDao;
 import org.airsonic.player.dao.ArtistDao;
 import org.airsonic.player.dao.MediaFileDao;
+import org.airsonic.player.dao.PlaylistDao;
 import org.airsonic.player.domain.*;
 import org.airsonic.player.util.FileUtil;
 import org.apache.commons.lang.ObjectUtils;
@@ -65,6 +66,8 @@ public class MediaScannerService {
     private ArtistDao artistDao;
     @Autowired
     private AlbumDao albumDao;
+    @Autowired
+    private PlaylistDao playlistDao;
     private int scanCount;
 
     @PostConstruct
@@ -178,7 +181,9 @@ public class MediaScannerService {
             @Override
             public void run() {
                // doScanLibrary();
+                playlistService.importPlaylistsFromMediaFiles();
                 playlistService.importPlaylistsFromMediaFolder();
+
                 mediaFileDao.checkpoint();
             }
         };
@@ -364,6 +369,8 @@ public class MediaScannerService {
             mediaFileDao.createOrUpdateMediaFile(file);
         }
     }
+
+
 
     private void updateArtist(MediaFile file, MusicFolder musicFolder, Date lastScanned, Map<String, Integer> albumCount) {
         if (file.getAlbumArtist() == null || !file.isAudio()) {

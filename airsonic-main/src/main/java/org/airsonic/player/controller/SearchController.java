@@ -95,6 +95,9 @@ public class SearchController {
             SearchResult songs = searchService.search(criteria, musicFolders, SearchService.IndexType.SONG);
             command.setSongs(songs.getMediaFiles());
 
+            SearchResult playlists = searchService.search(criteria, musicFolders, SearchService.IndexType.PLAYLIST);
+            command.setPlaylists(playlists.getMediaFiles());
+
             command.setPlayer(playerService.getPlayer(request, response));
         }
 

@@ -120,6 +120,9 @@ public class PlaylistService {
     public Playlist getPlaylist(int id) {
         return playlistDao.getPlaylist(id);
     }
+    public Playlist getPlaylist(String importedFrom) {
+        return playlistDao.getPlaylist(importedFrom);
+    }
 
     public List<String> getPlaylistUsers(int playlistId) {
         return playlistDao.getPlaylistUsers(playlistId);
@@ -283,6 +286,35 @@ public class PlaylistService {
         }
     }
 
+    public void importPlaylistsFromMediaFiles() {
+        try {
+            LOG.info("Starting playlist import from media files.");
+            doImportPlaylistsFromMediaFile();
+            LOG.info("Completed playlist import from media files.");
+        } catch (Throwable x) {
+            LOG.warn("Failed to import playlists: " + x, x);
+        }
+    }
+
+    private void doImportPlaylistsFromMediaFile() throws Exception {
+
+        List<MediaFile> playlistFiles = new ArrayList<MediaFile>();
+
+        for (MediaFile file: mediaFileDao.geAllPlaylists()) {
+            LOG.info("Playlist media file: " + file.getPath());
+            playlistFiles.add(file);
+        }
+
+
+        List<Playlist> allPlaylists = playlistDao.getAllPlaylists();
+        for (MediaFile file : playlistFiles) {
+            try {
+                importPlaylistIfUpdated(file.getFile(), allPlaylists);
+            } catch (Exception x) {
+                LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
+            }
+        }
+    }
     private void doImportPlaylistsFromMediaFolder() throws Exception {
 
         List<File> playlistFiles = new ArrayList<File>();
@@ -325,6 +357,14 @@ public class PlaylistService {
                 LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
             }
         }
+        allPlaylists = playlistDao.getAllPlaylists();
+        for (File file : playlistFolder.listFiles()) {
+            try {
+                importPlaylistIfUpdated(file, allPlaylists);
+            } catch (Exception x) {
+                LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
+            }
+        }
     }
 
     private void importPlaylistIfUpdated(File file, List<Playlist> allPlaylists) throws Exception {
@@ -342,7 +382,7 @@ public class PlaylistService {
         }
         InputStream in = new FileInputStream(file);
         try {
-            importPlaylist(User.USERNAME_ADMIN, FilenameUtils.getBaseName(fileName), fileName, in, existingPlaylist);
+            importPlaylist(User.USERNAME_ADMIN, FilenameUtils.getBaseName(fileName), file.getAbsolutePath(), in, existingPlaylist);
             LOG.info("Auto-imported playlist " + file);
         } finally {
             IOUtils.closeQuietly(in);

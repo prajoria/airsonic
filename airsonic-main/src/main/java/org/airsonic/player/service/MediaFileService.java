@@ -36,7 +36,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
@@ -66,7 +68,6 @@ public class MediaFileService {
     @Autowired
     private MetaDataParserFactory metaDataParserFactory;
     private boolean memoryCacheEnabled = true;
-
     /**
      * Returns a media file instance for the given file.  If possible, a cached value is returned.
      *
@@ -113,8 +114,9 @@ public class MediaFileService {
 
         // Put in cache and database.
         putInMemoryCache(file, result);
-        mediaFileDao.createOrUpdateMediaFile(result);
 
+        mediaFileDao.createOrUpdateMediaFile(result);
+        LOG.info("Created/Updated " + result.getPath());
         return result;
     }
 
@@ -426,7 +428,7 @@ public class MediaFileService {
         for (File candidate : candidates) {
 
             String suffix = FilenameUtils.getExtension(candidate.getName()).toLowerCase();
-            if (!isExcluded(candidate) && (FileUtil.isDirectory(candidate) || isAudioFile(suffix) || isVideoFile(suffix))) {
+            if (!isExcluded(candidate) && (FileUtil.isDirectory(candidate) || isAudioFile(suffix) || isVideoFile(suffix) || isPlaylistFile(suffix)) ) {
                 result.add(candidate);
             }
         }
@@ -436,6 +438,15 @@ public class MediaFileService {
 
     private boolean isAudioFile(String suffix) {
         for (String s : settingsService.getMusicFileTypesAsArray()) {
+            if (suffix.equals(s.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPlaylistFile(String suffix) {
+        for (String s : settingsService.getPlaylistFileTypesAsArray()) {
             if (suffix.equals(s.toLowerCase())) {
                 return true;
             }
@@ -493,9 +504,38 @@ public class MediaFileService {
         mediaFile.setPresent(true);
 
         if (file.isFile()) {
-            if(file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith(".m3u") || file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith(".m3u8"))
+            String suffix = FilenameUtils.getExtension(file.getName()).toLowerCase();
+
+            if(isPlaylistFile(suffix))
             {
                 mediaFile.setMediaType(MediaFile.MediaType.MUSIC_PLAYLIST);
+                mediaFile.setArtist("Various Artists");
+                mediaFile.setAlbumName(file.getName().replace("." + suffix, ""));
+                //mediaFile.setYear(metaData.getYear());
+                //mediaFile.setGenre(metaData.getGenre());
+//                try {
+//
+//                    FileReader fileReader = new FileReader(file);
+//                    BufferedReader bufferedReader = new BufferedReader(fileReader);
+//                    StringBuffer stringBuffer = new StringBuffer();
+//                    String line;
+//                    mediaFile.setMediaType(MediaFile.MediaType.MUSIC_PLAYLIST);
+//
+//                    while ((line = bufferedReader.readLine()) != null) {
+//                        try {
+//                            if (!line.isEmpty() && !line.startsWith("#") && FileUtil.exists(line)) {
+//                                break;
+//                            }
+//                        }catch(Exception e) {
+//                            LOG.warn("Not valid file " + e);
+//                        }
+//                    }
+//                    fileReader.close();
+//                    System.out.println("Contents of file:");
+//                    System.out.println(stringBuffer.toString());
+//                } catch (IOException e) {
+//                    LOG.warn("Not valid file " + e);
+//                }
             }else {
 
                 MetaDataParser parser = metaDataParserFactory.getParser(file);
@@ -526,7 +566,7 @@ public class MediaFileService {
 
             // Is this an album?
             if (!isRoot(mediaFile)) {
-                LOG.info("Listing dir " + file);
+
                 File[] children = FileUtil.listFiles(file);
                 File firstChild = null;
                 for (File child : filterMediaFiles(children)) {

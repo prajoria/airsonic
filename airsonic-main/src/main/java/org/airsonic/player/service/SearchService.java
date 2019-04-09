@@ -73,6 +73,8 @@ public class SearchService {
     private static final String FIELD_ID = "id";
     private static final String FIELD_TITLE = "title";
     private static final String FIELD_ALBUM = "album";
+    private static final String FIELD_PLAYLIST = "playlist";
+
     private static final String FIELD_ARTIST = "artist";
     private static final String FIELD_GENRE = "genre";
     private static final String FIELD_YEAR = "year";
@@ -93,6 +95,9 @@ public class SearchService {
     private IndexWriter artistWriter;
     private IndexWriter artistId3Writer;
     private IndexWriter albumWriter;
+    private IndexWriter playlistWriter;
+    private IndexWriter playlistId3Writer;
+
     private IndexWriter albumId3Writer;
     private IndexWriter songWriter;
 
@@ -106,6 +111,8 @@ public class SearchService {
             artistId3Writer = createIndexWriter(ARTIST_ID3);
             albumWriter = createIndexWriter(ALBUM);
             albumId3Writer = createIndexWriter(ALBUM_ID3);
+            playlistWriter = createIndexWriter(PLAYLIST);
+            playlistId3Writer =  createIndexWriter(PLAYLIST_ID3);
             songWriter = createIndexWriter(SONG);
         } catch (Exception x) {
             LOG.error("Failed to create search index.", x);
@@ -114,11 +121,13 @@ public class SearchService {
 
     public void index(MediaFile mediaFile) {
         try {
-            if (mediaFile.isFile()) {
+            if (mediaFile.isFile() && !mediaFile.isPlaylist()) {
                 songWriter.addDocument(SONG.createDocument(mediaFile));
             } else if (mediaFile.isAlbum()) {
                 albumWriter.addDocument(ALBUM.createDocument(mediaFile));
-            } else {
+            } else if(mediaFile.isPlaylist()){
+                playlistWriter.addDocument(PLAYLIST.createDocument(mediaFile));
+            }else {
                 artistWriter.addDocument(ARTIST.createDocument(mediaFile));
             }
         } catch (Exception x) {
@@ -149,6 +158,7 @@ public class SearchService {
             albumWriter.optimize();
             albumId3Writer.optimize();
             songWriter.optimize();
+            playlistWriter.optimize();
         } catch (Exception x) {
             LOG.error("Failed to create search index.", x);
         } finally {
@@ -157,6 +167,7 @@ public class SearchService {
             FileUtil.closeQuietly(albumWriter);
             FileUtil.closeQuietly(albumId3Writer);
             FileUtil.closeQuietly(songWriter);
+            FileUtil.closeQuietly(playlistWriter);
         }
     }
 
@@ -201,6 +212,10 @@ public class SearchService {
                     case ARTIST:
                     case ALBUM:
                         MediaFile mediaFile = mediaFileService.getMediaFile(Integer.valueOf(doc.get(FIELD_ID)));
+                        addIfNotNull(mediaFile, result.getMediaFiles());
+                        break;
+                    case PLAYLIST:
+                        mediaFile = mediaFileService.getMediaFile(Integer.valueOf(doc.get(FIELD_ID)));
                         addIfNotNull(mediaFile, result.getMediaFiles());
                         break;
                     case ARTIST_ID3:
@@ -556,6 +571,46 @@ public class SearchService {
                 }
                 if (album.getName() != null) {
                     doc.add(new Field(FIELD_ALBUM, album.getName(), Field.Store.YES, Field.Index.ANALYZED));
+                }
+                if (album.getFolderId() != null) {
+                    doc.add(new NumericField(FIELD_FOLDER_ID, Field.Store.NO, true).setIntValue(album.getFolderId()));
+                }
+
+                return doc;
+            }
+        },
+
+        PLAYLIST(new String[]{FIELD_PLAYLIST, FIELD_ARTIST, FIELD_FOLDER}, FIELD_PLAYLIST) {
+            @Override
+            public Document createDocument(MediaFile mediaFile) {
+                Document doc = new Document();
+                doc.add(new NumericField(FIELD_ID, Field.Store.YES, false).setIntValue(mediaFile.getId()));
+
+                if (mediaFile.getArtist() != null) {
+                    doc.add(new Field(FIELD_ARTIST, mediaFile.getArtist(), Field.Store.YES, Field.Index.ANALYZED));
+                }
+                if (mediaFile.getAlbumName() != null) {
+                    doc.add(new Field(FIELD_PLAYLIST, mediaFile.getAlbumName(), Field.Store.YES, Field.Index.ANALYZED));
+                }
+                if (mediaFile.getFolder() != null) {
+                    doc.add(new Field(FIELD_FOLDER, mediaFile.getFolder(), Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS));
+                }
+
+                return doc;
+            }
+        },
+
+        PLAYLIST_ID3(new String[]{FIELD_PLAYLIST, FIELD_ARTIST, FIELD_FOLDER_ID}, FIELD_PLAYLIST) {
+            @Override
+            public Document createDocument(Album album) {
+                Document doc = new Document();
+                doc.add(new NumericField(FIELD_ID, Field.Store.YES, false).setIntValue(album.getId()));
+
+                if (album.getArtist() != null) {
+                    doc.add(new Field(FIELD_ARTIST, album.getArtist(), Field.Store.YES, Field.Index.ANALYZED));
+                }
+                if (album.getName() != null) {
+                    doc.add(new Field(FIELD_PLAYLIST, album.getName(), Field.Store.YES, Field.Index.ANALYZED));
                 }
                 if (album.getFolderId() != null) {
                     doc.add(new NumericField(FIELD_FOLDER_ID, Field.Store.NO, true).setIntValue(album.getFolderId()));

@@ -72,7 +72,7 @@ public class MainController  {
         }
 
         MediaFile dir = mediaFiles.get(0);
-        if (dir.isFile()) {
+        if (dir.isFile() && !dir.isPlaylist()) {
             dir = mediaFileService.getParentOf(dir);
         }
 

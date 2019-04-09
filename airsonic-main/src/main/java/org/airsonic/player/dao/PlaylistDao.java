@@ -19,8 +19,12 @@
  */
 package org.airsonic.player.dao;
 
+import org.airsonic.player.domain.Album;
 import org.airsonic.player.domain.MediaFile;
 import org.airsonic.player.domain.Playlist;
+import org.airsonic.player.util.FileUtil;
+import org.apache.commons.lang.ObjectUtils;
+import org.fourthline.cling.support.avtransport.callback.Play;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
@@ -76,10 +80,37 @@ public class PlaylistDao extends AbstractDao {
         return queryOne("select " + QUERY_COLUMNS + " from playlist where id=?", rowMapper, id);
     }
 
+    public Playlist getPlaylist(String importedFrom) {
+        return queryOne("select " + QUERY_COLUMNS + " from playlist where imported_from=?", rowMapper, importedFrom);
+    }
+
     public List<Playlist> getAllPlaylists() {
         return query("select " + QUERY_COLUMNS + " from playlist", rowMapper);
     }
+    /**
+     * Returns the album that the given file (most likely) is part of.
+     *
+     * @param file The media file.
+     * @return The album or null.
+     */
+    public Playlist getPlaylistForFile(MediaFile file) {
 
+        // First, get all albums with the correct album name (irrespective of artist).
+        List<Playlist> candidates = query("select " + QUERY_COLUMNS + " from playlist where name=?", rowMapper, file.getAlbumName());
+        if (candidates.isEmpty()) {
+            return null;
+        }
+
+        // Look for album with the correct artist.
+        for (Playlist candidate : candidates) {
+            if (ObjectUtils.equals(candidate.getImportedFrom(), file.getPath()) && FileUtil.exists(candidate.getImportedFrom())) {
+                return candidate;
+            }
+        }
+
+        // No appropriate album found.
+        return null;
+    }
     @Transactional
     public void createPlaylist(Playlist playlist) {
         update("insert into playlist(" + INSERT_COLUMNS + ") values(" + questionMarks(INSERT_COLUMNS) + ")",

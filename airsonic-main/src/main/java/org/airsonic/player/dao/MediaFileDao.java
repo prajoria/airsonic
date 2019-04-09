@@ -87,6 +87,16 @@ public class MediaFileDao extends AbstractDao {
         return query("select " + QUERY_COLUMNS + " from media_file where parent_path=? and present", rowMapper, path);
     }
 
+    /**
+     * Returns the media file that are direct children of the given path.
+     *
+     * @return The list of children.
+     */
+    public List<MediaFile> geAllPlaylists() {
+
+        return query("select " + QUERY_COLUMNS + " from media_file where Path LIKE '%.m3u%' and present", rowMapper);
+    }
+
     public List<MediaFile> getFilesInPlaylist(int playlistId) {
         return query("select " + prefix(QUERY_COLUMNS, "media_file") + " from playlist_file, media_file where " +
                      "media_file.id = playlist_file.media_file_id and " +

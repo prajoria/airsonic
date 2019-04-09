@@ -63,6 +63,8 @@ public class SettingsService {
     private static final String KEY_SHORTCUTS = "Shortcuts";
     private static final String KEY_PLAYLIST_FOLDER = "PlaylistFolder";
     private static final String KEY_MUSIC_FILE_TYPES = "MusicFileTypes";
+    private static final String KEY_PLAYLIST_FILE_TYPES = "MusicPlaylistTypes";
+
     private static final String KEY_VIDEO_FILE_TYPES = "VideoFileTypes";
     private static final String KEY_COVER_ART_FILE_TYPES = "CoverArtFileTypes2";
     private static final String KEY_COVER_ART_CONCURRENCY = "CoverArtConcurrency";
@@ -139,6 +141,8 @@ public class SettingsService {
     private static final String DEFAULT_SHORTCUTS = "New Incoming Podcast";
     private static final String DEFAULT_PLAYLIST_FOLDER = Util.getDefaultPlaylistFolder();
     private static final String DEFAULT_MUSIC_FILE_TYPES = "mp3 ogg oga aac m4a flac wav wma aif aiff ape mpc shn mka opus";
+    private static final String DEFAULT_PLAYLIST_FILE_TYPES = "m3u m3u8 pls";
+
     private static final String DEFAULT_VIDEO_FILE_TYPES = "flv avi mpg mpeg mp4 m4v mkv mov wmv ogv divx m2ts";
     private static final String DEFAULT_COVER_ART_FILE_TYPES = "cover.jpg cover.png cover.gif folder.jpg jpg jpeg gif png";
     private static final int DEFAULT_COVER_ART_CONCURRENCY = 4;
@@ -245,6 +249,8 @@ public class SettingsService {
     private String[] cachedCoverArtFileTypesArray;
     private String[] cachedMusicFileTypesArray;
     private String[] cachedVideoFileTypesArray;
+    private String[] cachedPlaylistFileTypesArray;
+
     private List<MusicFolder> cachedMusicFolders;
     private final ConcurrentMap<String, List<MusicFolder>> cachedMusicFoldersPerUser = new ConcurrentHashMap<>();
 
@@ -424,11 +430,27 @@ public class SettingsService {
         cachedMusicFileTypesArray = null;
     }
 
+    public String getPlaylistFileTypes() {
+        return getProperty(KEY_PLAYLIST_FILE_TYPES, DEFAULT_PLAYLIST_FILE_TYPES);
+    }
+
+    public synchronized void setPlaylistFileTypes(String fileTypes) {
+        setProperty(KEY_MUSIC_FILE_TYPES, fileTypes);
+        cachedPlaylistFileTypesArray = null;
+    }
+
     synchronized String[] getMusicFileTypesAsArray() {
         if (cachedMusicFileTypesArray == null) {
             cachedMusicFileTypesArray = toStringArray(getMusicFileTypes());
         }
         return cachedMusicFileTypesArray;
+    }
+
+    synchronized String[] getPlaylistFileTypesAsArray() {
+        if (cachedPlaylistFileTypesArray == null) {
+            cachedPlaylistFileTypesArray = toStringArray(getPlaylistFileTypes());
+        }
+        return cachedPlaylistFileTypesArray;
     }
 
     public String getVideoFileTypes() {

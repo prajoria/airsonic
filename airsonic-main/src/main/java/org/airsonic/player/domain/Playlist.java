@@ -19,9 +19,12 @@
  */
 package org.airsonic.player.domain;
 
+import org.airsonic.player.util.FileUtil;
 import org.airsonic.player.util.StringUtil;
+import org.apache.commons.lang.ObjectUtils;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Sindre Mehus
@@ -55,6 +58,8 @@ public class Playlist {
         this.changed = changed;
         this.importedFrom = importedFrom;
     }
+
+
 
     public int getId() {
         return id;

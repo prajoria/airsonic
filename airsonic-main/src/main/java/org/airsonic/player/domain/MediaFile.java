@@ -108,7 +108,7 @@ public class MediaFile {
     }
 
     public MediaFile() {
-    }
+}
 
     public int getId() {
         return id;
@@ -177,6 +177,9 @@ public class MediaFile {
 
     public boolean isAlbum() {
         return mediaType == MediaType.ALBUM;
+    }
+    public boolean isPlaylist() {
+        return mediaType == MediaType.MUSIC_PLAYLIST;
     }
 
     public String getTitle() {

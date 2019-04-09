@@ -38,8 +38,7 @@ public class SearchCommand {
     private List<MediaFile> artists;
     private List<MediaFile> albums;
     private List<MediaFile> songs;
-
-    private List<Playlist> playlists;
+    private List<MediaFile> playlists;
 
     private boolean isIndexBeingCreated;
     private User user;
@@ -86,11 +85,11 @@ public class SearchCommand {
         this.songs = songs;
     }
 
-    public List<Playlist> getPlaylists() {
+    public List<MediaFile> getPlaylists() {
         return playlists;
     }
 
-    public void setPlaylists(List<Playlist> playlists) {
+    public void setPlaylists(List<MediaFile> playlists) {
         this.playlists = playlists;
     }
 
