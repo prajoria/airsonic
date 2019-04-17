@@ -322,8 +322,8 @@
 
     <xs:complexType name="SearchResult4">
         <xs:sequence>
-            <xs:element name="artist" type="sub:ArtistID3" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="album" type="sub:AlbumID3" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="artist" type="sub:Artist" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="album" type="sub:Child" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="song" type="sub:Child" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="playlist" type="sub:Playlist" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
