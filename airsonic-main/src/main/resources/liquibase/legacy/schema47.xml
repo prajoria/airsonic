@@ -382,8 +382,14 @@
             </not>
         </preConditions>
         <addColumn tableName="playlist">
-            <column name="imported_from" type="${varchar_type}"/>
+            <column name="imported_from" type="${varchar_type}">
+                <constraints nullable="false" />
+            </column>
         </addColumn>
+        <createIndex tableName="playlist" indexName="idx_playlist_imported_from">
+            <column name="imported_from"/>
+        </createIndex>
+        <addUniqueConstraint tableName="playlist" columnNames="imported_from" />
     </changeSet>
     <changeSet id="schema47_011" author="muff1nman">
         <preConditions onFail="MARK_RAN">

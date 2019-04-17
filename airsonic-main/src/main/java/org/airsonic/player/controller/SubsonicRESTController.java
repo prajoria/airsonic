@@ -742,6 +742,52 @@ public class SubsonicRESTController {
         jaxbWriter.writeResponse(request, response, res);
     }
 
+    @RequestMapping(value = "/search4")
+    public void search4(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        request = wrapRequest(request);
+        Player player = playerService.getPlayer(request, response);
+        String username = securityService.getCurrentUsername(request);
+        Integer musicFolderId = getIntParameter(request, "musicFolderId");
+        List<org.airsonic.player.domain.MusicFolder> musicFolders = settingsService.getMusicFoldersForUser(username, musicFolderId);
+
+        SearchResult4 searchResult = new SearchResult4();
+
+        String query = request.getParameter("query");
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setQuery(StringUtils.trimToEmpty(query));
+        criteria.setCount(getIntParameter(request, "artistCount", 20));
+        criteria.setOffset(getIntParameter(request, "artistOffset", 0));
+        org.airsonic.player.domain.SearchResult artists = searchService.search(criteria, musicFolders, SearchService.IndexType.ARTIST);
+        for (MediaFile mediaFile : artists.getMediaFiles()) {
+            searchResult.getArtist().add(createJaxbArtist(mediaFile, username));
+        }
+
+        criteria.setCount(getIntParameter(request, "albumCount", 20));
+        criteria.setOffset(getIntParameter(request, "albumOffset", 0));
+        org.airsonic.player.domain.SearchResult albums = searchService.search(criteria, musicFolders, SearchService.IndexType.ALBUM);
+        for (MediaFile mediaFile : albums.getMediaFiles()) {
+            searchResult.getAlbum().add(createJaxbChild(player, mediaFile, username));
+        }
+
+        criteria.setCount(getIntParameter(request, "playlistCount", 20));
+        criteria.setOffset(getIntParameter(request, "playlistOffset", 0));
+        org.airsonic.player.domain.SearchResult playlists = searchService.search(criteria, musicFolders, SearchService.IndexType.PLAYLIST);
+        for (MediaFile mediaFile : playlists.getMediaFiles()) {
+            searchResult.getPlaylist().add(createJaxbPlaylist(new org.subsonic.restapi.Playlist(), playlistService.getPlaylist(mediaFile.getPath())));
+        }
+
+        criteria.setCount(getIntParameter(request, "songCount", 20));
+        criteria.setOffset(getIntParameter(request, "songOffset", 0));
+        org.airsonic.player.domain.SearchResult songs = searchService.search(criteria, musicFolders, SearchService.IndexType.SONG);
+        for (MediaFile mediaFile : songs.getMediaFiles()) {
+            searchResult.getSong().add(createJaxbChild(player, mediaFile, username));
+        }
+
+        Response res = createResponse();
+        res.setSearchResult4(searchResult);
+        jaxbWriter.writeResponse(request, response, res);
+    }
+
     @RequestMapping(value = "/search3")
     public void search3(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request = wrapRequest(request);
@@ -1246,7 +1292,12 @@ public class SubsonicRESTController {
 
     private <T extends Child> T createJaxbChild(T child, Player player, MediaFile mediaFile, String username) {
         MediaFile parent = mediaFileService.getParentOf(mediaFile);
-        child.setId(String.valueOf(mediaFile.getId()));
+        if(mediaFile.isPlaylist())
+        {
+            child.setId(String.valueOf(playlistService.getPlaylist(mediaFile.getPath()).getId()));
+        }else {
+            child.setId(String.valueOf(mediaFile.getId()));
+        }
         try {
             if (!mediaFileService.isRoot(parent)) {
                 child.setParent(String.valueOf(parent.getId()));
@@ -1788,7 +1839,12 @@ public class SubsonicRESTController {
         for (Integer mediaFileId : playQueue.getMediaFileIds()) {
             MediaFile mediaFile = mediaFileService.getMediaFile(mediaFileId);
             if (mediaFile != null) {
-                restPlayQueue.getEntry().add(createJaxbChild(player, mediaFile, username));
+                if(mediaFile.isPlaylist())
+                {
+                    //restPlayQueue.getEntry().add(createJaxbChild(player, mediaFile, username));
+                }else {
+                    restPlayQueue.getEntry().add(createJaxbChild(player, mediaFile, username));
+                }
             }
         }
 
