@@ -70,6 +70,15 @@ public class MediaFileDao extends AbstractDao {
     /**
      * Returns the media file for the given ID.
      *
+     * @return The media filesor null.
+     */
+    public List<MediaFile> getMissingMarkedMediaFile() {
+        return query("select " + QUERY_COLUMNS + " from media_file where present=0", rowMapper);
+    }
+
+    /**
+     * Returns the media file for the given ID.
+     *
      * @param id The ID.
      * @return The media file or null.
      */

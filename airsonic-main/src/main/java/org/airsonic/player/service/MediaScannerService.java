@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.print.attribute.standard.Media;
 
 import java.io.File;
 import java.util.*;
@@ -171,6 +172,33 @@ public class MediaScannerService {
      * Scans the media library.
      * The scanning is done asynchronously, i.e., this method returns immediately.
      */
+    public synchronized void scanMissingLibrary() {
+
+        Thread thread = new Thread("MediaLibraryScanner") {
+            @Override
+            public void run() {
+
+                List<MediaFile> missingMediaFiles = mediaFileService.getMissingMarkedMediaFile();
+                for(MediaFile mediaFile:missingMediaFiles){
+                    File mf = new File(mediaFile.getPath());
+                    if(mf.exists() && mf.isFile()){
+                        LOG.info("Found " + mediaFile.getPath() + " , marking as present");
+
+                        mediaFile.setPresent(true);
+                        mediaFileService.updateMediaFile(mediaFile);
+                    }
+                }
+            }
+        };
+
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+    }
+
+    /**
+     * Scans the media library.
+     * The scanning is done asynchronously, i.e., this method returns immediately.
+     */
     public synchronized void scanPlaylistLibrary() {
         if (isScanning()) {
             return;
@@ -180,19 +208,30 @@ public class MediaScannerService {
         Thread thread = new Thread("MediaLibraryScanner") {
             @Override
             public void run() {
-               // doScanLibrary();
-                playlistService.importPlaylistsFromMediaFiles();
-                playlistService.importPlaylistsFromMediaFolder();
-
-                mediaFileDao.checkpoint();
+                scanMediaPlaylists();
             }
+
+
         };
 
         thread.setPriority(Thread.MIN_PRIORITY);
         thread.start();
     }
 
+    private void scanMediaPlaylists() {
+        LOG.info("Starting to scan media playlists.");
+        try {
+            playlistService.importPlaylistsFromMediaFiles();
+            playlistService.importPlaylistsFromMediaFolder();
 
+            mediaFileDao.checkpoint();
+        }catch (Throwable x) {
+            LOG.error("Failed to scan playlists library.", x);
+        } finally {
+            mediaFileService.setMemoryCacheEnabled(true);
+            scanning = false;
+        }
+    }
     private void doScanLibrary() {
         LOG.info("Starting to scan media library.");
         Date lastScanned = DateUtils.truncate(new Date(), Calendar.SECOND);

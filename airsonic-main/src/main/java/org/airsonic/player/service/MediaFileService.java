@@ -31,6 +31,7 @@ import org.airsonic.player.service.metadata.MetaDataParserFactory;
 import org.airsonic.player.util.FileUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +128,16 @@ public class MediaFileService {
         mediaFile = createMediaFile(mediaFile.getFile());
         mediaFileDao.createOrUpdateMediaFile(mediaFile);
         return mediaFile;
+    }
+
+    /**
+     * Returns a media file instance for the given path name. If possible, a cached value is returned.
+     *
+     * @return A media file instance which is marked missing.
+     * @throws SecurityException If access is denied to the given file.
+     */
+    public List<MediaFile> getMissingMarkedMediaFile() {
+        return mediaFileDao.getMissingMarkedMediaFile();
     }
 
     /**
@@ -582,11 +593,18 @@ public class MediaFileService {
                     // Guess artist/album name, year and genre.
                     MetaDataParser parser = metaDataParserFactory.getParser(firstChild);
                     if (parser != null) {
-                        MetaData metaData = parser.getMetaData(firstChild);
-                        mediaFile.setArtist(metaData.getAlbumArtist());
-                        mediaFile.setAlbumName(metaData.getAlbumName());
-                        mediaFile.setYear(metaData.getYear());
-                        mediaFile.setGenre(metaData.getGenre());
+                        try {
+                            MetaData metaData = parser.getMetaData(firstChild);
+                            mediaFile.setArtist(metaData.getAlbumArtist());
+                            mediaFile.setAlbumName(metaData.getAlbumName());
+                            mediaFile.setYear(metaData.getYear());
+                            mediaFile.setGenre(metaData.getGenre());
+                        }catch(Exception e){
+                            LOG.info("MediaFIleService:createMediaFile - Failed to parse " + mediaFile.getPath() + " probably not a flac file." + e.getMessage());
+                            // take metadata from file path
+                            //mediaFile.setAlbumName(mediaFile.getP);
+                        }
+
                     }
 
                     // Look for cover art.

@@ -191,6 +191,7 @@ public class PlaylistService {
         // TODO: handle other encodings
         final SpecificPlaylist inputSpecificPlaylist = SpecificPlaylistFactory.getInstance().readFrom(inputStream, "UTF-8");
         if (inputSpecificPlaylist == null) {
+
             throw new Exception("Unsupported playlist " + fileName);
         }
         PlaylistImportHandler importHandler = getImportHandler(inputSpecificPlaylist);
@@ -369,13 +370,15 @@ public class PlaylistService {
 
     private void importPlaylistIfUpdated(File file, List<Playlist> allPlaylists) throws Exception {
 
-        String fileName = file.getName();
+        String fileName = file.getAbsolutePath();
         Playlist existingPlaylist = null;
         for (Playlist playlist : allPlaylists) {
             if (fileName.equals(playlist.getImportedFrom())) {
                 existingPlaylist = playlist;
                 if (file.lastModified() <= playlist.getChanged().getTime()) {
                     // Already imported and not changed since.
+                    LOG.info("Auto-imported playlist skipped as not changed " + file);
+
                     return;
                 }
             }
