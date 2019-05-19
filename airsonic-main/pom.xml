@@ -30,7 +30,13 @@
             <artifactId>airsonic-sonos-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+    <!-- Spotify api dependencies  -->
+        <dependency>
+            <groupId>se.michaelthelin.spotify</groupId>
+            <artifactId>spotify-web-api-java</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <!-- Spotify api dependencies  ends -->
         <!-- Java Audio Player and needed dependencies
          -->
         <dependency>
