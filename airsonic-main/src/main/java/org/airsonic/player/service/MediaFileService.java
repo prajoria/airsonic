@@ -605,7 +605,7 @@ public class MediaFileService {
                             mediaFile.setYear(metaData.getYear());
                             mediaFile.setGenre(metaData.getGenre());
                         }catch(Exception e){
-                            LOG.info("MediaFIleService:createMediaFile - Failed to parse " + mediaFile.getPath() + " probably not a flac file." + e.getMessage());
+                            LOG.info("MediaFileService:createMediaFile - Failed to parse " + mediaFile.getPath() + " probably not a flac file." + e.getMessage());
                             // take metadata from file path
                             //mediaFile.setAlbumName(mediaFile.getP);
                         }

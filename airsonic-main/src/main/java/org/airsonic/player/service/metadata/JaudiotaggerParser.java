@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
-import org.jaudiotagger.audio.generic.Utils;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.images.Artwork;
@@ -84,10 +83,7 @@ public class JaudiotaggerParser extends MetaDataParser {
         MetaData metaData = new MetaData();
 
         try {
-            AudioFile audioFile = null;
-
-            audioFile = AudioFileIO.read(file);
-
+            AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
             if (tag != null) {
                 metaData.setAlbumName(getTagField(tag, FieldKey.ALBUM));
@@ -113,24 +109,9 @@ public class JaudiotaggerParser extends MetaDataParser {
 
 
         } catch (Throwable x) {
-            //try as mp3
-
             LOG.warn("Error when parsing tags in " + file, x);
         }
 
-        if(metaData.getTitle() == null){
-            // get metadata from file
-            LOG.warn("File is not valid guessing tags from file " + file);
-
-            String album = (new File(file.getParent())).getName();
-            String ext = Utils.getExtension(file);
-            String title = file.getName().replace("." + ext, "");
-            metaData.setAlbumName(album);
-            metaData.setTitle(title);
-            metaData.setVariableBitRate(true);
-            metaData.setBitRate(320);
-            metaData.setDurationSeconds(300);
-        }
         return metaData;
     }
 
@@ -180,7 +161,7 @@ public class JaudiotaggerParser extends MetaDataParser {
         Integer result = null;
 
         try {
-            result = new Integer(trackNumber);
+            result = Integer.valueOf(trackNumber);
         } catch (NumberFormatException x) {
             Matcher matcher = TRACK_NUMBER_PATTERN.matcher(trackNumber);
             if (matcher.matches()) {
@@ -206,7 +187,7 @@ public class JaudiotaggerParser extends MetaDataParser {
         Integer result = null;
 
         try {
-            result = new Integer(year);
+            result = Integer.valueOf(year);
         } catch (NumberFormatException x) {
             Matcher matcher = YEAR_NUMBER_PATTERN.matcher(year);
             if (matcher.matches()) {
