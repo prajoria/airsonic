@@ -309,7 +309,7 @@ public class PlaylistService {
         List<Playlist> allPlaylists = playlistDao.getAllPlaylists();
         for (MediaFile file : playlistFiles) {
             try {
-                importPlaylistIfUpdated(file.getFile(), allPlaylists);
+                importPlaylistIfUpdatedFromMediaFiles(file.getFile(), allPlaylists);
             } catch (Exception x) {
                 LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
             }
@@ -364,6 +364,28 @@ public class PlaylistService {
             } catch (Exception x) {
                 LOG.warn("Failed to auto-import playlist " + file + ". " + x.getMessage());
             }
+        }
+    }
+
+    private void importPlaylistIfUpdatedFromMediaFiles(File file, List<Playlist> allPlaylists) throws Exception {
+
+        String fileName = file.getName();
+        Playlist existingPlaylist = null;
+        for (Playlist playlist : allPlaylists) {
+            if (file.getPath().equals(playlist.getImportedFrom())) {
+                existingPlaylist = playlist;
+                if (file.lastModified() <= playlist.getChanged().getTime()) {
+                    // Already imported and not changed since.
+                    return;
+                }
+            }
+        }
+        InputStream in = new FileInputStream(file);
+        try {
+            importPlaylist(User.USERNAME_ADMIN, FilenameUtils.getBaseName(fileName), file.getAbsolutePath(), in, existingPlaylist);
+            LOG.info("Auto-imported playlist " + file);
+        } finally {
+            IOUtils.closeQuietly(in);
         }
     }
 

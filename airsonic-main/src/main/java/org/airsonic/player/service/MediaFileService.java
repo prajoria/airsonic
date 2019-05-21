@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.reflect.annotation.ExceptionProxy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -221,6 +222,10 @@ public class MediaFileService {
      * @see MusicFolder
      */
     public boolean isRoot(MediaFile mediaFile) {
+        if(mediaFile == null){
+            return false;
+        }
+
         for (MusicFolder musicFolder : settingsService.getAllMusicFolders(false, true)) {
             if (mediaFile.getPath().equals(musicFolder.getPath().getPath())) {
                 return true;
@@ -582,11 +587,15 @@ public class MediaFileService {
                     // Guess artist/album name, year and genre.
                     MetaDataParser parser = metaDataParserFactory.getParser(firstChild);
                     if (parser != null) {
-                        MetaData metaData = parser.getMetaData(firstChild);
-                        mediaFile.setArtist(metaData.getAlbumArtist());
-                        mediaFile.setAlbumName(metaData.getAlbumName());
-                        mediaFile.setYear(metaData.getYear());
-                        mediaFile.setGenre(metaData.getGenre());
+                        try {
+                            MetaData metaData = parser.getMetaData(firstChild);
+                            mediaFile.setArtist(metaData.getAlbumArtist());
+                            mediaFile.setAlbumName(metaData.getAlbumName());
+                            mediaFile.setYear(metaData.getYear());
+                            mediaFile.setGenre(metaData.getGenre());
+                        }catch(Exception e){
+                            LOG.warn("Failed to get metadata " + mediaFile.getPath());
+                        }
                     }
 
                     // Look for cover art.

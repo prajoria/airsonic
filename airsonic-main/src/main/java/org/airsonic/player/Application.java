@@ -2,6 +2,8 @@ package org.airsonic.player;
 
 import net.sf.ehcache.constructs.web.ShutdownListener;
 import org.airsonic.player.filter.*;
+import org.airsonic.player.spotify.AuthorizationCodeExample;
+import org.airsonic.player.spotify.AuthorizationCodeUriExample;
 import org.directwebremoting.servlet.DwrServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,8 +227,12 @@ public class Application extends SpringBootServletInitializer implements Embedde
     }
 
     public static void main(String[] args) {
+
         SpringApplicationBuilder builder = new SpringApplicationBuilder();
         doConfigure(builder).run(args);
+
+//        AuthorizationCodeUriExample.authorizationCodeUri_Sync();
+        //AuthorizationCodeExample.authorizationCode_Sync();
     }
 
 }

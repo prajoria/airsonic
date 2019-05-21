@@ -65,6 +65,7 @@ public class PlaylistController {
 
         int id = ServletRequestUtils.getIntParameter(request, "id", 0);
         String path = ServletRequestUtils.getStringParameter(request, "path", null);
+        int sync = ServletRequestUtils.getIntParameter(request, "sync", -1);
 
         User user = securityService.getCurrentUser(request);
         String username = user.getUsername();
@@ -81,6 +82,11 @@ public class PlaylistController {
             return new ModelAndView(new RedirectView("notFound"));
         }
 
+        if(sync == 1 || sync == 0)
+        {
+            playlist.setMust_sync(sync);
+            playlistService.updatePlaylist(playlist);
+        }
         map.put("playlist", playlist);
         map.put("user", user);
         map.put("player", player);

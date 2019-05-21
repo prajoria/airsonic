@@ -20,13 +20,27 @@
     <c:set var="caption2">
         ${playlist.fileCount} <fmt:message key="playlist2.songs"/> &ndash; ${playlist.durationAsString}
     </c:set>
+    <c:if test="${playlist.must_sync eq 0}">
+                <c:set var="caption3">
+                           <a href="playlist.view?sync=1&id=${playlist.id}" title="Sync">Sync</a>
+                </c:set>
+    </c:if>
+    <c:if test="${playlist.must_sync eq 1}">
+          <c:set var="caption3">
+                            <a href="${targetUrl}" title="Do Not Sync">Do Not Sync</a>
+
+          </c:set>
+    </c:if>
+
+
     <div class="albumThumb">
         <c:import url="coverArt.jsp">
             <c:param name="playlistId" value="${playlist.id}"/>
             <c:param name="coverArtSize" value="200"/>
             <c:param name="caption1" value="${fn:escapeXml(playlist.name)}"/>
             <c:param name="caption2" value="${caption2}"/>
-            <c:param name="captionCount" value="2"/>
+            <c:param name="caption3" value="${caption3}"/>
+            <c:param name="captionCount" value="3"/>
             <c:param name="showLink" value="true"/>
             <c:param name="appearAfter" value="${loopStatus.count * 30}"/>
         </c:import>
