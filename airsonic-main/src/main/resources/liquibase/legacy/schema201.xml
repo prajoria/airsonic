@@ -1,0 +1,150 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="schema47_001" author="prajoria">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="spotify_playlist_file" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="spotify_playlist_file">
+            <column name="pls_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="href" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="id" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="name" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="owner" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="uri" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="images" type="${varchar_type}" />
+            <column name="version" type="int" >
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex unique="true" tableName="spotify_playlist_file" indexName="idx_spotify_playlist_href">
+            <column name="href"/>
+        </createIndex>
+        <createIndex tableName="spotify_playlist_file" indexName="idx_spotify_playlist_file_id">
+            <column name="id"/>
+        </createIndex>
+        <createIndex tableName="spotify_playlist_file" indexName="idx_spotify_playlist_uri">
+            <column name="uri"/>
+        </createIndex>
+        <createIndex tableName="spotify_playlist_file" indexName="idx_spotify_playlist_file_name">
+            <column name="name"/>
+        </createIndex>
+
+        <sql dbms="hsql">
+            set table spotify_playlist_file type cached
+        </sql>
+        <rollback>
+            <dropTable tableName="spotify_playlist_file" />
+        </rollback>
+    </changeSet>
+    <changeSet id="schema47_002" author="prajoria">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="spotify_tracks" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="spotify_tracks">
+            <column name="track_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="href" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="album" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="artists" type="${varchar_type}" >
+            </column>
+            <column name="name" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="id" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="uri" type="${varchar_type}" >
+                <constraints nullable="false" />
+            </column>
+            <column name="disc_number" type="int" />
+            <column name="track_number" type="int" />
+            <column name="year" type="int" />
+            <column name="explicit" type="int" />
+            <column name="genre" type="${varchar_type}" />
+            <column name="external_ids" type="${varchar_type}" />
+            <column name="external_urls" type="${varchar_type}" />
+            <column name="linked_from" type="${varchar_type}" />
+
+            <column name="duration_ms" type="int" />
+            <column name="images" type="${varchar_type}" />
+
+            <column name="version" type="int" >
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createIndex unique="true" tableName="spotify_tracks" indexName="idx_spotify_tracks_href">
+            <column name="href"/>
+        </createIndex>
+        <createIndex tableName="spotify_tracks" indexName="idx_spotify_tracks_id">
+            <column name="id"/>
+        </createIndex>
+        <createIndex tableName="spotify_tracks" indexName="idx_spotify_tracks_uri">
+            <column name="uri"/>
+        </createIndex>
+        <createIndex tableName="spotify_tracks" indexName="idx_spotify_tracks_name">
+            <column name="name"/>
+        </createIndex>
+        <createIndex tableName="spotify_tracks" indexName="idx_spotify_tracks_album">
+            <column name="album"/>
+        </createIndex>
+        <sql dbms="hsql">
+            set table spotify_tracks type cached
+        </sql>
+        <rollback>
+            <dropTable tableName="spotify_tracks" />
+        </rollback>
+    </changeSet>
+    <changeSet id="schema47_003" author="prajoria">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="spotify_playlist_track_mapping" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="spotify_playlist_track_mapping">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="spotify_playlist_id" type="int" >
+                <constraints nullable="false" foreignKeyName="spf_p_fk" referencedTableName="spotify_playlist_file" referencedColumnNames="pls_id" deleteCascade="true" />
+            </column>
+            <column name="spotify_track_id" type="int" >
+                <constraints nullable="false" foreignKeyName="spf_mf_fk" referencedTableName="spotify_tracks" referencedColumnNames="track_id" deleteCascade="true" />
+            </column>
+        </createTable>
+
+        <sql dbms="hsql">
+            set table spotify_playlist_track_mapping type cached
+        </sql>
+        <rollback>
+            <dropTable tableName="spotify_playlist_track_mapping" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

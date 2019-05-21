@@ -71,6 +71,7 @@ public class MusicFolderSettingsController {
     @ModelAttribute
     protected void formBackingObject(@RequestParam(value = "scanNow",required = false) String scanNow,
                                      @RequestParam(value = "scanPlaylistNow",required = false) String scanPlaylistNow,
+                                     @RequestParam(value = "scanMissingFiles",required = false) String scanMissingFiles,
                                      @RequestParam(value = "scanSpotifyPlaylists",required = false) String scanSpotifyPlaylists,
                                        @RequestParam(value = "expunge",required = false) String expunge,
                                        Model model) throws Exception {
@@ -84,7 +85,9 @@ public class MusicFolderSettingsController {
             settingsService.clearMusicFolderCache();
             mediaScannerService.scanPlaylistLibrary();
         }
-
+        if(scanMissingFiles != null){
+            mediaScannerService.scanMissingLibrary();
+        }
         if (scanPlaylistNow != null) {
             settingsService.clearMusicFolderCache();
             mediaScannerService.scanPlaylistLibrary();

@@ -466,7 +466,7 @@ public class SearchService {
 
     private IndexWriter createIndexWriter(IndexType indexType) throws IOException {
         File dir = getIndexDirectory(indexType);
-        return new IndexWriter(FSDirectory.open(dir), new CustomAnalyzer(), true, new IndexWriter.MaxFieldLength(10));
+        return new IndexWriter(FSDirectory.open(dir), new CustomAnalyzer(), true, new IndexWriter.MaxFieldLength(20));
     }
 
     private IndexReader createIndexReader(IndexType indexType) throws IOException {
