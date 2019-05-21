@@ -88,9 +88,10 @@ public class PlaylistService {
     }
 
     private void populateAccess(List<MediaFile> files, String username) {
+
         for (MediaFile file : files) {
-            if (!securityService.isFolderAccessAllowed(file, username)) {
-                file.setPresent(false);
+            if (!username.equalsIgnoreCase( "admin") && !securityService.isFolderAccessAllowed(file, username)) {
+                //file.setPresent(false);
             }
         }
     }

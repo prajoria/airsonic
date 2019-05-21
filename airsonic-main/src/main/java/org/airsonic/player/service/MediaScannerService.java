@@ -181,7 +181,7 @@ public class MediaScannerService {
                 List<MediaFile> missingMediaFiles = mediaFileService.getMissingMarkedMediaFile();
                 for(MediaFile mediaFile:missingMediaFiles){
                     File mf = new File(mediaFile.getPath());
-                    if(mf.exists() && mf.isFile()){
+                    if(mf.exists()){
                         LOG.info("Found " + mediaFile.getPath() + " , marking as present");
 
                         mediaFile.setPresent(true);

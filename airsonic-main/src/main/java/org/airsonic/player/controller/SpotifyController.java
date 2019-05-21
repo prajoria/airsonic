@@ -47,8 +47,8 @@ import java.util.Map;
  * @author Sindre Mehus
  */
 @Controller
-@RequestMapping("/playlist")
-public class PlaylistController {
+@RequestMapping("/spotifyplaylist")
+public class SpotifyController {
 
     @Autowired
     private SecurityService securityService;
