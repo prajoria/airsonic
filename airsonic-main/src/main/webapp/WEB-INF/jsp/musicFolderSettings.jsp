@@ -113,11 +113,14 @@
 
             <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanMediaFolders"/></c:import></td>
         </tr>
-         <tr>
-                    <td><div class="forward"><a href="musicFolderSettings.view?scanMissingFiles">Scan Missing Files</a></div></td>
-
-                    <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanMissingFiles"/></c:import></td>
-                </tr>
+        <tr>
+                <td><div class="forward"><a href="musicFolderSettings.view?scanSpotifyPlaylists">Scan Playlists</a></div></td>
+                <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanSpotifyPlaylists"/></c:import></td>
+        </tr>
+        <tr>
+                <td><div class="forward"><a href="musicFolderSettings.view?scanSpotifyPlaylists">Scan Playlists</a></div></td>
+                <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanSpotifyPlaylists"/></c:import></td>
+        </tr>
     </table>
 
     <c:if test="${command.scanning}">

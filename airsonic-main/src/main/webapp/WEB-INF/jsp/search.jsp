@@ -18,7 +18,9 @@
         function showMoreSongs() {
             $('.songRow').show();$('#moreSongs').hide();
         }
-
+        function showMorePlaylists() {
+            $('.playlistRow').show();$('#morePlaylists').hide();
+        }
     </script>
 </head>
 <body class="mainframe bgcolor1">
@@ -125,13 +127,19 @@
 <c:if test="${not empty command.playlists}">
     <h2><b><fmt:message key="search.hits.playlists"/></b></h2>
     <table class="music indent">
-        <c:forEach items="${command.playlists}" var="match" varStatus="loopStatus">
+        <c:forEach items="${command.playlistsMediaFile}" var="match" varStatus="loopStatus">
 
             <sub:url value="/playlist.view" var="mainUrl">
                 <sub:param name="path" value="${match.path}"/>
             </sub:url>
+             <sub:url value="/playlist.view" var="syncUrl">
+                <sub:param name="path" value="${match.path}"/>
+                <sub:param name="sync" value="1"/>
 
-            <tr class="albumRow" ${loopStatus.count > 5 ? "style='display:none'" : ""}>
+            </sub:url>
+
+            <tr class="playlistRow" ${loopStatus.count > 15 ? "style='display:none'" : ""}>
+
                 <c:import url="playButtons.jsp">
                     <c:param name="id" value="${match.id}"/>
                     <c:param name="playEnabled" value="${command.user.streamRole and not command.partyModeEnabled}"/>
@@ -139,14 +147,16 @@
                     <c:param name="asTable" value="true"/>
                 </c:import>
 
+                <td class="truncate"><a href="${syncUrl}">Sync</a></td>
+
                 <td class="truncate"><a href="${mainUrl}">${fn:escapeXml(match.albumName)}</a></td>
                 <td class="truncate"><span class="detail">${fn:escapeXml(match.artist)}</span></td>
             </tr>
 
-            </c:forEach>
+        </c:forEach>
     </table>
-    <c:if test="${fn:length(command.albums) gt 5}">
-        <div id="moreAlbums" class="forward"><a href="javascript:showMoreAlbums()"><fmt:message key="search.hits.more"/></a></div>
+    <c:if test="${fn:length(command.playlists) gt 10}">
+        <div id="moreAlbums" class="forward"><a href="javascript:showMorePlaylists()"><fmt:message key="search.hits.more"/></a></div>
     </c:if>
 </c:if>
 

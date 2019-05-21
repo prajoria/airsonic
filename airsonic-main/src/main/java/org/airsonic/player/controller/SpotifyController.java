@@ -27,6 +27,7 @@ import org.airsonic.player.service.PlayerService;
 import org.airsonic.player.service.PlaylistService;
 import org.airsonic.player.service.SecurityService;
 import org.airsonic.player.service.SettingsService;
+import org.airsonic.player.spotify.AuthorizationCodeExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestUtils;
@@ -37,7 +38,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,31 +63,31 @@ public class SpotifyController {
     protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> map = new HashMap<>();
 
-        int id = ServletRequestUtils.getIntParameter(request, "id", 0);
-        String path = ServletRequestUtils.getStringParameter(request, "path", null);
+        String code = ServletRequestUtils.getStringParameter(request, "code", null);
+        AuthorizationCodeExample.code = code;
+        AuthorizationCodeExample.authorizationCode_Sync();
+//        User user = securityService.getCurrentUser(request);
+//        String username = user.getUsername();
+//        UserSettings userSettings = settingsService.getUserSettings(username);
+//        Player player = playerService.getPlayer(request, response);
+//        Playlist playlist = null;
+//        if(id != 0) {
+//            playlist = playlistService.getPlaylist(id);
+//        }else if (path != null){
+//            playlist = playlistService.getPlaylist(path);
+//        }
+//
+//        if (playlist == null) {
+//            return new ModelAndView(new RedirectView("notFound"));
+//        }
 
-        User user = securityService.getCurrentUser(request);
-        String username = user.getUsername();
-        UserSettings userSettings = settingsService.getUserSettings(username);
-        Player player = playerService.getPlayer(request, response);
-        Playlist playlist = null;
-        if(id != 0) {
-            playlist = playlistService.getPlaylist(id);
-        }else if (path != null){
-            playlist = playlistService.getPlaylist(path);
-        }
+//        map.put("playlist", playlist);
+//        map.put("user", user);
+//        map.put("player", player);
+//        map.put("editAllowed", username.equals(playlist.getUsername()) || securityService.isAdmin(username));
+//        map.put("partyMode", userSettings.isPartyModeEnabled());
 
-        if (playlist == null) {
-            return new ModelAndView(new RedirectView("notFound"));
-        }
-
-        map.put("playlist", playlist);
-        map.put("user", user);
-        map.put("player", player);
-        map.put("editAllowed", username.equals(playlist.getUsername()) || securityService.isAdmin(username));
-        map.put("partyMode", userSettings.isPartyModeEnabled());
-
-        return new ModelAndView("playlist","model",map);
+        return new ModelAndView("index","model",map);
     }
 
 

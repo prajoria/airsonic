@@ -21,10 +21,7 @@ package org.airsonic.player.controller;
 
 import org.airsonic.player.command.SearchCommand;
 import org.airsonic.player.domain.*;
-import org.airsonic.player.service.PlayerService;
-import org.airsonic.player.service.SearchService;
-import org.airsonic.player.service.SecurityService;
-import org.airsonic.player.service.SettingsService;
+import org.airsonic.player.service.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,6 +55,8 @@ public class SearchController {
     private PlayerService playerService;
     @Autowired
     private SearchService searchService;
+    @Autowired
+    private PlaylistService playlistService;
 
     @RequestMapping(method = RequestMethod.GET)
     protected String displayForm() throws Exception {
@@ -96,8 +96,12 @@ public class SearchController {
             command.setSongs(songs.getMediaFiles());
 
             SearchResult playlists = searchService.search(criteria, musicFolders, SearchService.IndexType.PLAYLIST);
-            command.setPlaylists(playlists.getMediaFiles());
-
+            command.setPlaylistsMediaFile(playlists.getMediaFiles());
+            List<Playlist> plsList = new ArrayList<Playlist>();
+            for(MediaFile pls:playlists.getMediaFiles()) {
+                plsList.add( playlistService.getPlaylist(pls.getId()));
+            }
+            command.setPlaylists(plsList);
             command.setPlayer(playerService.getPlayer(request, response));
         }
 

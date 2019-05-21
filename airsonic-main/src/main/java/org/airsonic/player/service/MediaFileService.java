@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.reflect.annotation.ExceptionProxy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -232,6 +233,10 @@ public class MediaFileService {
      * @see MusicFolder
      */
     public boolean isRoot(MediaFile mediaFile) {
+        if(mediaFile == null){
+            return false;
+        }
+
         for (MusicFolder musicFolder : settingsService.getAllMusicFolders(false, true)) {
             if (mediaFile.getPath().equals(musicFolder.getPath().getPath())) {
                 return true;

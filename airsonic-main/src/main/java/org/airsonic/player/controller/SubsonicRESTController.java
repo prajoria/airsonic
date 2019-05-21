@@ -30,6 +30,7 @@ import org.airsonic.player.dao.PlayQueueDao;
 import org.airsonic.player.domain.*;
 import org.airsonic.player.domain.Bookmark;
 import org.airsonic.player.domain.PlayQueue;
+import org.airsonic.player.domain.Playlist;
 import org.airsonic.player.i18n.LocaleResolver;
 import org.airsonic.player.service.*;
 import org.airsonic.player.util.Pair;
@@ -557,6 +558,7 @@ public class SubsonicRESTController {
         jaxbPlaylist.setComment(playlist.getComment());
         jaxbPlaylist.setOwner(playlist.getUsername());
         jaxbPlaylist.setPublic(playlist.isShared());
+        jaxbPlaylist.setFavorite(playlist.getMust_sync() == 1);
         jaxbPlaylist.setSongCount(playlist.getFileCount());
         jaxbPlaylist.setDuration(playlist.getDurationSeconds());
         jaxbPlaylist.setCreated(jaxbWriter.convertDate(playlist.getCreated()));
@@ -744,48 +746,66 @@ public class SubsonicRESTController {
 
     @RequestMapping(value = "/search4")
     public void search4(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        request = wrapRequest(request);
-        Player player = playerService.getPlayer(request, response);
-        String username = securityService.getCurrentUsername(request);
-        Integer musicFolderId = getIntParameter(request, "musicFolderId");
-        List<org.airsonic.player.domain.MusicFolder> musicFolders = settingsService.getMusicFoldersForUser(username, musicFolderId);
 
+        request = wrapRequest(request);
         SearchResult4 searchResult = new SearchResult4();
 
-        String query = request.getParameter("query");
-        SearchCriteria criteria = new SearchCriteria();
-        criteria.setQuery(StringUtils.trimToEmpty(query));
-        criteria.setCount(getIntParameter(request, "artistCount", 20));
-        criteria.setOffset(getIntParameter(request, "artistOffset", 0));
-        org.airsonic.player.domain.SearchResult artists = searchService.search(criteria, musicFolders, SearchService.IndexType.ARTIST);
-        for (MediaFile mediaFile : artists.getMediaFiles()) {
-            searchResult.getArtist().add(createJaxbArtist(mediaFile, username));
-        }
+        try {
+            Player player = playerService.getPlayer(request, response);
+            String username = securityService.getCurrentUsername(request);
+            Integer musicFolderId = getIntParameter(request, "musicFolderId");
+            List<org.airsonic.player.domain.MusicFolder> musicFolders = settingsService.getMusicFoldersForUser(username, musicFolderId);
 
-        criteria.setCount(getIntParameter(request, "albumCount", 20));
-        criteria.setOffset(getIntParameter(request, "albumOffset", 0));
-        org.airsonic.player.domain.SearchResult albums = searchService.search(criteria, musicFolders, SearchService.IndexType.ALBUM);
-        for (MediaFile mediaFile : albums.getMediaFiles()) {
-            searchResult.getAlbum().add(createJaxbChild(player, mediaFile, username));
-        }
+            String query = request.getParameter("query");
+            if(!query.endsWith("*")) {
+                SearchCriteria criteria = new SearchCriteria();
+                criteria.setQuery(StringUtils.trimToEmpty(query));
+                criteria.setCount(getIntParameter(request, "artistCount", 20));
+                criteria.setOffset(getIntParameter(request, "artistOffset", 0));
+//                org.airsonic.player.domain.SearchResult artists = searchService.search(criteria, musicFolders, SearchService.IndexType.ARTIST);
+//                for (MediaFile mediaFile : artists.getMediaFiles()) {
+//                    searchResult.getArtist().add(createJaxbArtist(mediaFile, username));
+//                }
 
-        criteria.setCount(getIntParameter(request, "playlistCount", 20));
-        criteria.setOffset(getIntParameter(request, "playlistOffset", 0));
-        org.airsonic.player.domain.SearchResult playlists = searchService.search(criteria, musicFolders, SearchService.IndexType.PLAYLIST);
-        for (MediaFile mediaFile : playlists.getMediaFiles()) {
-            searchResult.getPlaylist().add(createJaxbPlaylist(new org.subsonic.restapi.Playlist(), playlistService.getPlaylist(mediaFile.getPath())));
-        }
+                criteria.setCount(getIntParameter(request, "albumCount", 20));
+                criteria.setOffset(getIntParameter(request, "albumOffset", 0));
+                org.airsonic.player.domain.SearchResult albums = searchService.search(criteria, musicFolders, SearchService.IndexType.ALBUM);
+                for (MediaFile mediaFile : albums.getMediaFiles()) {
+                    Child child = createJaxbChild(player, mediaFile, username);
+                    if(child != null) {
+                        searchResult.getAlbum().add(child);
+                    }else{
+                        LOG.warn("Failed to add " + mediaFile.getPath());
+                    }
+                }
 
-        criteria.setCount(getIntParameter(request, "songCount", 20));
-        criteria.setOffset(getIntParameter(request, "songOffset", 0));
-        org.airsonic.player.domain.SearchResult songs = searchService.search(criteria, musicFolders, SearchService.IndexType.SONG);
-        for (MediaFile mediaFile : songs.getMediaFiles()) {
-            searchResult.getSong().add(createJaxbChild(player, mediaFile, username));
-        }
+                criteria.setCount(getIntParameter(request, "playlistCount", 20));
+                criteria.setOffset(getIntParameter(request, "playlistOffset", 0));
+                org.airsonic.player.domain.SearchResult playlists = searchService.search(criteria, musicFolders, SearchService.IndexType.PLAYLIST);
+                for (MediaFile mediaFile : playlists.getMediaFiles()) {
+                    Playlist playlist = playlistService.getPlaylist(mediaFile.getPath());
+                    if (playlist != null) {
 
+                        searchResult.getPlaylist().add(createJaxbPlaylist(new org.subsonic.restapi.Playlist(), playlist));
+                    }
+                }
+
+                criteria.setCount(getIntParameter(request, "songCount", 20));
+                criteria.setOffset(getIntParameter(request, "songOffset", 0));
+                org.airsonic.player.domain.SearchResult songs = searchService.search(criteria, musicFolders, SearchService.IndexType.SONG);
+                for (MediaFile mediaFile : songs.getMediaFiles()) {
+                    searchResult.getSong().add(createJaxbChild(player, mediaFile, username));
+                }
+            }
+        }catch(Throwable e){
+            LOG.warn("Failed to search " + e.getStackTrace());
+        }
         Response res = createResponse();
         res.setSearchResult4(searchResult);
+
         jaxbWriter.writeResponse(request, response, res);
+
+
     }
 
     @RequestMapping(value = "/search3")
@@ -1291,88 +1311,113 @@ public class SubsonicRESTController {
     }
 
     private <T extends Child> T createJaxbChild(T child, Player player, MediaFile mediaFile, String username) {
-        MediaFile parent = mediaFileService.getParentOf(mediaFile);
-        if(mediaFile.isPlaylist())
-        {
-            child.setId(String.valueOf(playlistService.getPlaylist(mediaFile.getPath()).getId()));
-        }else {
-            child.setId(String.valueOf(mediaFile.getId()));
-        }
         try {
-            if (!mediaFileService.isRoot(parent)) {
-                child.setParent(String.valueOf(parent.getId()));
+            if (mediaFile.isPlaylist()) {
+                child.setId(String.valueOf(playlistService.getPlaylist(mediaFile.getPath()).getId()));
+            } else {
+                child.setId(String.valueOf(mediaFile.getId()));
             }
-        } catch (SecurityException x) {
-            // Ignored.
-        }
-        child.setTitle(mediaFile.getName());
-        child.setAlbum(mediaFile.getAlbumName());
-        child.setArtist(mediaFile.getArtist());
-        child.setIsDir(mediaFile.isDirectory());
-        child.setCoverArt(findCoverArt(mediaFile, parent));
-        child.setYear(mediaFile.getYear());
-        child.setGenre(mediaFile.getGenre());
-        child.setCreated(jaxbWriter.convertDate(mediaFile.getCreated()));
-        child.setStarred(jaxbWriter.convertDate(mediaFileDao.getMediaFileStarredDate(mediaFile.getId(), username)));
-        child.setUserRating(ratingService.getRatingForUser(username, mediaFile));
-        child.setAverageRating(ratingService.getAverageRating(mediaFile));
-        child.setPlayCount((long) mediaFile.getPlayCount());
+            MediaFile parent = null;
+            if(mediaFile.getMediaType() != MediaFile.MediaType.ALBUM) {
+                try {
 
-        if (mediaFile.isFile()) {
-            child.setDuration(mediaFile.getDurationSeconds());
-            child.setBitRate(mediaFile.getBitRate());
-            child.setTrack(mediaFile.getTrackNumber());
-            child.setDiscNumber(mediaFile.getDiscNumber());
-            child.setSize(mediaFile.getFileSize());
-            String suffix = mediaFile.getFormat();
-            child.setSuffix(suffix);
-            child.setContentType(StringUtil.getMimeType(suffix));
-            child.setIsVideo(mediaFile.isVideo());
-            child.setPath(getRelativePath(mediaFile, settingsService));
+                    parent = mediaFileService.getParentOf(mediaFile);
+                    if (parent != null) {
 
-            org.airsonic.player.domain.Bookmark bookmark = bookmarkCache.get(new BookmarkKey(username, mediaFile.getId()));
-            if (bookmark != null) {
-                child.setBookmarkPosition(bookmark.getPositionMillis());
-            }
+                        if (!mediaFileService.isRoot(parent)) {
+                            child.setParent(String.valueOf(parent.getId()));
+                        }
+                    } else {
+                        LOG.warn("Failed to get parent for", mediaFile.getParentPath());
+                    }
 
-            if (mediaFile.getAlbumArtist() != null && mediaFile.getAlbumName() != null) {
-                Album album = albumDao.getAlbum(mediaFile.getAlbumArtist(), mediaFile.getAlbumName());
-                if (album != null) {
-                    child.setAlbumId(String.valueOf(album.getId()));
+                } catch (Exception x) {
+                    LOG.warn("Failed to get parent", x);
+                } catch (Throwable e) {
+                    LOG.warn("Failed to get parent", e);
                 }
             }
-            if (mediaFile.getArtist() != null) {
-                org.airsonic.player.domain.Artist artist = artistDao.getArtist(mediaFile.getArtist());
-                if (artist != null) {
-                    child.setArtistId(String.valueOf(artist.getId()));
-                }
-            }
-            switch (mediaFile.getMediaType()) {
-                case MUSIC:
-                    child.setType(MediaType.MUSIC);
-                    break;
-                case PODCAST:
-                    child.setType(MediaType.PODCAST);
-                    break;
-                case AUDIOBOOK:
-                    child.setType(MediaType.AUDIOBOOK);
-                    break;
-                case VIDEO:
-                    child.setType(MediaType.VIDEO);
-                    child.setOriginalWidth(mediaFile.getWidth());
-                    child.setOriginalHeight(mediaFile.getHeight());
-                    break;
-                default:
-                    break;
-            }
 
-            if (transcodingService.isTranscodingRequired(mediaFile, player)) {
-                String transcodedSuffix = transcodingService.getSuffix(player, mediaFile, null);
-                child.setTranscodedSuffix(transcodedSuffix);
-                child.setTranscodedContentType(StringUtil.getMimeType(transcodedSuffix));
+            child.setTitle(mediaFile.getName());
+            child.setAlbum(mediaFile.getAlbumName());
+            child.setArtist(mediaFile.getArtist());
+            child.setIsDir(mediaFile.isDirectory());
+            if(mediaFile.getMediaType() == MediaFile.MediaType.ALBUM) {
+                child.setCoverArt(mediaFile.getCoverArtPath());
+            }else if(parent != null) {
+                child.setCoverArt(findCoverArt(mediaFile, parent));
             }
+            child.setYear(mediaFile.getYear());
+            child.setGenre(mediaFile.getGenre());
+            child.setCreated(jaxbWriter.convertDate(mediaFile.getCreated()));
+            child.setStarred(jaxbWriter.convertDate(mediaFileDao.getMediaFileStarredDate(mediaFile.getId(), username)));
+            child.setUserRating(ratingService.getRatingForUser(username, mediaFile));
+            child.setAverageRating(ratingService.getAverageRating(mediaFile));
+            child.setPlayCount((long) mediaFile.getPlayCount());
+
+            if (mediaFile.isFile()) {
+                child.setDuration(mediaFile.getDurationSeconds());
+                child.setBitRate(mediaFile.getBitRate());
+                child.setTrack(mediaFile.getTrackNumber());
+                child.setDiscNumber(mediaFile.getDiscNumber());
+                child.setSize(mediaFile.getFileSize());
+                String suffix = mediaFile.getFormat();
+                child.setSuffix(suffix);
+                child.setContentType(StringUtil.getMimeType(suffix));
+                child.setIsVideo(mediaFile.isVideo());
+                child.setPath(getRelativePath(mediaFile, settingsService));
+
+                org.airsonic.player.domain.Bookmark bookmark = bookmarkCache.get(new BookmarkKey(username, mediaFile.getId()));
+                if (bookmark != null) {
+                    child.setBookmarkPosition(bookmark.getPositionMillis());
+                }
+
+                if (mediaFile.getAlbumArtist() != null && mediaFile.getAlbumName() != null) {
+                    Album album = albumDao.getAlbum(mediaFile.getAlbumArtist(), mediaFile.getAlbumName());
+                    if (album != null) {
+                        child.setAlbumId(String.valueOf(album.getId()));
+                    }
+                }
+                if (mediaFile.getArtist() != null) {
+                    org.airsonic.player.domain.Artist artist = artistDao.getArtist(mediaFile.getArtist());
+                    if (artist != null) {
+                        child.setArtistId(String.valueOf(artist.getId()));
+                    }
+                }
+                switch (mediaFile.getMediaType()) {
+                    case MUSIC:
+                        child.setType(MediaType.MUSIC);
+                        break;
+                    case PODCAST:
+                        child.setType(MediaType.PODCAST);
+                        break;
+                    case AUDIOBOOK:
+                        child.setType(MediaType.AUDIOBOOK);
+                        break;
+                    case VIDEO:
+                        child.setType(MediaType.VIDEO);
+                        child.setOriginalWidth(mediaFile.getWidth());
+                        child.setOriginalHeight(mediaFile.getHeight());
+                        break;
+                    default:
+                        break;
+                }
+
+                if (transcodingService.isTranscodingRequired(mediaFile, player)) {
+                    String transcodedSuffix = transcodingService.getSuffix(player, mediaFile, null);
+                    child.setTranscodedSuffix(transcodedSuffix);
+                    child.setTranscodedContentType(StringUtil.getMimeType(transcodedSuffix));
+                }
+
+            }
+            return child;
+
+        }catch(Exception ee) {
+            LOG.warn("Failed to get");
+        }catch(Throwable ee) {
+            LOG.warn("Failed to get");
         }
-        return child;
+        return null;
     }
 
     private String findCoverArt(MediaFile mediaFile, MediaFile parent) {

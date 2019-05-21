@@ -42,11 +42,14 @@ public class Playlist {
     private Date changed;
     private String importedFrom;
 
+
+
+    private  int must_sync;
     public Playlist() {
     }
 
     public Playlist(int id, String username, boolean shared, String name, String comment, int fileCount,
-                    int durationSeconds, Date created, Date changed, String importedFrom) {
+                    int durationSeconds, Date created, Date changed, String importedFrom, int must_sync) {
         this.id = id;
         this.username = username;
         this.shared = shared;
@@ -57,9 +60,17 @@ public class Playlist {
         this.created = created;
         this.changed = changed;
         this.importedFrom = importedFrom;
+        this.must_sync = must_sync;
     }
 
 
+    public int getMust_sync() {
+        return must_sync;
+    }
+
+    public void setMust_sync(int must_sync) {
+        this.must_sync = must_sync;
+    }
 
     public int getId() {
         return id;

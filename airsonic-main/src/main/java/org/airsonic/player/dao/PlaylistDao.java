@@ -45,7 +45,7 @@ public class PlaylistDao extends AbstractDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlaylistDao.class);
     private static final String INSERT_COLUMNS = "username, is_public, name, comment, file_count, duration_seconds, " +
-                                                "created, changed, imported_from";
+                                                "created, changed, imported_from, must_sync";
     private static final String QUERY_COLUMNS = "id, " + INSERT_COLUMNS;
     private final RowMapper rowMapper = new PlaylistMapper();
 
@@ -153,9 +153,9 @@ public class PlaylistDao extends AbstractDao {
     }
 
     public void updatePlaylist(Playlist playlist) {
-        update("update playlist set username=?, is_public=?, name=?, comment=?, changed=?, imported_from=? where id=?",
+        update("update playlist set username=?, is_public=?, name=?, comment=?, changed=?, imported_from=?, must_sync=? where id=?",
                 playlist.getUsername(), playlist.isShared(), playlist.getName(), playlist.getComment(),
-                new Date(), playlist.getImportedFrom(), playlist.getId());
+                new Date(), playlist.getImportedFrom(), playlist.getMust_sync(), playlist.getId());
     }
 
     private static class PlaylistMapper implements RowMapper<Playlist> {
@@ -170,7 +170,9 @@ public class PlaylistDao extends AbstractDao {
                     rs.getInt(7),
                     rs.getTimestamp(8),
                     rs.getTimestamp(9),
-                    rs.getString(10));
+                    rs.getString(10),
+                    rs.getInt(11));
+
         }
     }
 }

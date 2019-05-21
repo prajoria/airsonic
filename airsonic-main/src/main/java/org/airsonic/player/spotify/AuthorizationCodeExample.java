@@ -1,4 +1,4 @@
-package org.airsonic.player.org.airsonic.player.spotify;
+package org.airsonic.player.spotify;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
@@ -14,21 +14,25 @@ import java.util.concurrent.Future;
 public class AuthorizationCodeExample {
 //    var spotifyClient = "a58751c0772b497ca9104c14f0f31e16";
 //    var spotifySecret = "fd519a49cb9b4a88bf2d9286a2b72cd5";
-    private static final String clientId = "a58751c0772b497ca9104c14f0f31e16";
-    private static final String clientSecret = "fd519a49cb9b4a88bf2d9286a2b72cd5";
-    private static final URI redirectUri = SpotifyHttpManager.makeUri("https://example.com/spotify-redirect");
-    private static final String code = "";
+    private static final String clientId = "81f7d7c7998d47d7bcec47ac1eae3016";
+    private static final String clientSecret = "7dc45819822a40109feb4ec690f24b87";
+    private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8080/spotify_login");
+
+    public static String code = "";
 
     private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
             .setClientId(clientId)
             .setClientSecret(clientSecret)
             .setRedirectUri(redirectUri)
             .build();
-    private static final AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code)
+    private static AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code)
             .build();
 
     public static void authorizationCode_Sync() {
         try {
+            authorizationCodeRequest = spotifyApi.authorizationCode(code)
+                    .build();
+
             final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
 
             // Set access and refresh token for further "spotifyApi" object usage

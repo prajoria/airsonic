@@ -29,6 +29,8 @@
     <include file="schema61.xml" relativeToChangelogFile="true"/>
     <include file="schema62.xml" relativeToChangelogFile="true"/>
     <include file="schema100.xml" relativeToChangelogFile="true"/>
+    <include file="schema302.xml" relativeToChangelogFile="true"/>
+
     <include file="schema201.xml" relativeToChangelogFile="true"/>
     <include file="schema302.xml" relativeToChangelogFile="true"/>
 
