@@ -24,7 +24,7 @@
 
 
 <c:import url="settingsHeader.jsp">
-    <c:param name="cat" value="musicFolder"/>
+    <c:param name="cat" value="audiobooks"/>
     <c:param name="toast" value="${settings_toast}"/>
 </c:import>
 

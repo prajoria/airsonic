@@ -282,7 +282,10 @@ public class StreamController  {
 
     private long getFileLength(TranscodingService.Parameters parameters) {
         MediaFile file = parameters.getMediaFile();
-
+        if(file == null) {
+            LOG.warn("Unknown duration for " + file + ". Unable to estimate transcoded size.");
+            return 0;
+        }
         if (!parameters.isDownsample() && !parameters.isTranscode()) {
             return file.getFileSize();
         }

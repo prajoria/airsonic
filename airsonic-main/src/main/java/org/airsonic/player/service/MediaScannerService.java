@@ -161,6 +161,7 @@ public class MediaScannerService {
                 doScanLibrary();
                 playlistService.importPlaylists();
                 mediaFileDao.checkpoint();
+                scanMediaPlaylists();
             }
         };
 

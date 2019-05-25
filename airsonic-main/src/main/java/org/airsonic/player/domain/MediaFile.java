@@ -310,7 +310,7 @@ public class MediaFile {
     }
 
     public Long getFileSize() {
-        return fileSize;
+        return fileSize != null?fileSize:0;
     }
 
     public void setFileSize(Long fileSize) {
