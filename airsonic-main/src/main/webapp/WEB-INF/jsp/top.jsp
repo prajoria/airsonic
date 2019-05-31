@@ -100,6 +100,10 @@
             <a href="playlists.view?" target="main"><img src="<spring:theme code="playlistImage"/>" title="${playlists}" alt="${playlists}"></a>
             <div class="topHeader"><a href="playlists.view?" target="main">${playlists}</a></div>
         </td>
+        <td style="min-width:3em;padding-right:1em;text-align: center">
+                    <a href="playlists.view?" target="main"><img src="<spring:theme code="playlistImage"/>" title="${playlists}" alt="${playlists}"></a>
+                    <div class="topHeader"><a href="favplaylists.view?" target="main">Favorite Playlists</a></div>
+        </td>
         <td style="min-width:4em;padding-right:1em;text-align: center">
             <a href="podcastChannels.view?" target="main"><img src="<spring:theme code="podcastLargeImage"/>" title="${podcast}" alt="${podcast}"></a>
             <div class="topHeader"><a href="podcastChannels.view?" target="main">${podcast}</a></div>

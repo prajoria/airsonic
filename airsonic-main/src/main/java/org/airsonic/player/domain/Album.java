@@ -183,7 +183,7 @@ public class Album {
     }
 
     public boolean isPresent() {
-        return present;
+        return true;//present;
     }
 
     public void setPresent(boolean present) {

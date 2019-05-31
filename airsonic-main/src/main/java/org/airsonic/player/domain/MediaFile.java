@@ -430,7 +430,7 @@ public class MediaFile {
     }
 
     public boolean isPresent() {
-        return present;
+        return true; //present;
     }
 
     public void setPresent(boolean present) {

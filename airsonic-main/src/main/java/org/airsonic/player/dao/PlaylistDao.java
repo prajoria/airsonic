@@ -49,6 +49,30 @@ public class PlaylistDao extends AbstractDao {
     private static final String QUERY_COLUMNS = "id, " + INSERT_COLUMNS;
     private final RowMapper rowMapper = new PlaylistMapper();
 
+    public List<Playlist> getReadableFavoritePlaylistsForUser(String username) {
+
+        List<Playlist> result1 = getWritableFavoritePlaylistsForUser(username);
+        List<Playlist> result2 = query("select " + QUERY_COLUMNS + " from playlist where is_public and must_sync = 1", rowMapper);
+        List<Playlist> result3 = query("select " + prefix(QUERY_COLUMNS, "playlist") + " from playlist, playlist_user where " +
+                "playlist.id = playlist_user.playlist_id and " +
+                "playlist.username != ? and " +
+                "playlist_user.username = ? and " +
+                "playlist.must_sync = 1", rowMapper, username, username);
+
+        // Put in sorted map to avoid duplicates.
+        SortedMap<Integer, Playlist> map = new TreeMap<Integer, Playlist>();
+        for (Playlist playlist : result1) {
+            map.put(playlist.getId(), playlist);
+        }
+        for (Playlist playlist : result2) {
+            map.put(playlist.getId(), playlist);
+        }
+        for (Playlist playlist : result3) {
+            map.put(playlist.getId(), playlist);
+        }
+        return new ArrayList<Playlist>(map.values());
+    }
+
     public List<Playlist> getReadablePlaylistsForUser(String username) {
 
         List<Playlist> result1 = getWritablePlaylistsForUser(username);
@@ -70,6 +94,10 @@ public class PlaylistDao extends AbstractDao {
             map.put(playlist.getId(), playlist);
         }
         return new ArrayList<Playlist>(map.values());
+    }
+
+    public List<Playlist> getWritableFavoritePlaylistsForUser(String username) {
+        return query("select " + QUERY_COLUMNS + " from playlist where username=? and must_sync = 1", rowMapper, username);
     }
 
     public List<Playlist> getWritablePlaylistsForUser(String username) {
@@ -115,7 +143,7 @@ public class PlaylistDao extends AbstractDao {
     public void createPlaylist(Playlist playlist) {
         update("insert into playlist(" + INSERT_COLUMNS + ") values(" + questionMarks(INSERT_COLUMNS) + ")",
                 playlist.getUsername(), playlist.isShared(), playlist.getName(), playlist.getComment(),
-                0, 0, playlist.getCreated(), playlist.getChanged(), playlist.getImportedFrom());
+                0, 0, playlist.getCreated(), playlist.getChanged(), playlist.getImportedFrom(), playlist.getMust_sync());
 
         int id = queryForInt("select max(id) from playlist", 0);
         playlist.setId(id);

@@ -102,6 +102,10 @@ public class PlaylistService {
         return sort(playlistDao.getReadablePlaylistsForUser(username));
     }
 
+    public List<Playlist> getReadableFavoritePlaylistsForUser(String username) {
+        return sort(playlistDao.getReadableFavoritePlaylistsForUser(username));
+    }
+
     public List<Playlist> getWritablePlaylistsForUser(String username) {
 
         // Admin users are allowed to modify all playlists that are visible to them.
@@ -243,7 +247,11 @@ public class PlaylistService {
 
     public void exportMobilePlaylist(int id, OutputStream out) throws Exception {
         String format = settingsService.getPlaylistExportFormat();
+
         SpecificPlaylistProvider provider = SpecificPlaylistFactory.getInstance().findProviderById(format);
+        Playlist pls = getPlaylist(id);
+        pls.setMust_sync(1);
+        playlistDao.updatePlaylist(pls);
         PlaylistExportHandler handler = getExportHandler(provider);
         handler.setExportForMobile(true);
         SpecificPlaylist specificPlaylist = handler.handle(id, provider);

@@ -847,6 +847,32 @@ public class SubsonicRESTController {
         jaxbWriter.writeResponse(request, response, res);
     }
 
+    @RequestMapping(value = "/getFavoritePlaylists")
+    public void getFavoritePlaylists(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        request = wrapRequest(request);
+
+        org.airsonic.player.domain.User user = securityService.getCurrentUser(request);
+        String authenticatedUsername = user.getUsername();
+        String requestedUsername = request.getParameter("username");
+
+        if (requestedUsername == null) {
+            requestedUsername = authenticatedUsername;
+        } else if (!user.isAdminRole()) {
+            error(request, response, ErrorCode.NOT_AUTHORIZED, authenticatedUsername + " is not authorized to get playlists for " + requestedUsername);
+            return;
+        }
+
+        Playlists result = new Playlists();
+
+        for (org.airsonic.player.domain.Playlist playlist : playlistService.getReadableFavoritePlaylistsForUser(requestedUsername)) {
+            result.getPlaylist().add(createJaxbPlaylist(new org.subsonic.restapi.Playlist(), playlist));
+        }
+
+        Response res = createResponse();
+        res.setPlaylists(result);
+        jaxbWriter.writeResponse(request, response, res);
+    }
+
     @RequestMapping(value = "/getPlaylists")
     public void getPlaylists(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request = wrapRequest(request);

@@ -201,7 +201,7 @@
     <c:url value="exportPlaylist.view" var="exportUrl"><c:param name="id" value="${model.playlist.id}"/></c:url>
     <c:url value="exportMobilePlaylist.view" var="exportMobileUrl"><c:param name="id" value="${model.playlist.id}"/></c:url>
     <span class="header"><a href="${exportUrl}"><fmt:message key="playlist2.export"/></a></span>
-    <span class="header"><a href="${exportMobileUrl}">Export Mobile Playlist</a></span>
+    <span class="header"><a href="${exportMobileUrl}">Must Sync</a></span>
 </h2>
 
 <div id="comment" class="detail" style="padding-top:0.2em">${fn:escapeXml(model.playlist.comment)}</div>

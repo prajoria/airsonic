@@ -90,7 +90,7 @@ public class PlaylistInfo {
         }
 
         public boolean isPresent() {
-            return present;
+            return true; //present;
         }
     }
 }

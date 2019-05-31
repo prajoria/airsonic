@@ -89,7 +89,7 @@ public class Artist {
     }
 
     public boolean isPresent() {
-        return present;
+        return true; //present;
     }
 
     public void setPresent(boolean present) {

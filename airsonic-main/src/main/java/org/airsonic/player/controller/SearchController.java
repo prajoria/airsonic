@@ -45,7 +45,7 @@ import java.util.List;
 @RequestMapping("/search")
 public class SearchController {
 
-    private static final int MATCH_COUNT = 25;
+    private static final int MATCH_COUNT = 5000;
 
     @Autowired
     private SecurityService securityService;
