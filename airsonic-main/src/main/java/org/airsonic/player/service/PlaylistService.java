@@ -384,6 +384,8 @@ public class PlaylistService {
             if (file.getPath().equals(playlist.getImportedFrom())) {
                 existingPlaylist = playlist;
                 if (file.lastModified() <= playlist.getChanged().getTime()) {
+                    LOG.info("Auto-imported is skipped as not modified playlist " + file);
+
                     // Already imported and not changed since.
                     return;
                 }

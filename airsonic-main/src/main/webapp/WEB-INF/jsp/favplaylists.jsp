@@ -27,7 +27,7 @@
     </c:if>
     <c:if test="${playlist.must_sync eq 1}">
           <c:set var="caption3">
-                            <a href="${targetUrl}" title="Do Not Sync">Do Not Sync</a>
+                            <a href="playlist.view?sync=0&id=${playlist.id}" title="Do Not Sync">Do Not Sync</a>
 
           </c:set>
     </c:if>

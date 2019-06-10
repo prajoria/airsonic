@@ -201,9 +201,9 @@ public class MediaScannerService {
      * The scanning is done asynchronously, i.e., this method returns immediately.
      */
     public synchronized void scanPlaylistLibrary() {
-        if (isScanning()) {
-            return;
-        }
+//        if (isScanning()) {
+//            return;
+//        }
         scanning = true;
 
         Thread thread = new Thread("MediaLibraryScanner") {
@@ -225,7 +225,7 @@ public class MediaScannerService {
             playlistService.importPlaylistsFromMediaFiles();
             playlistService.importPlaylistsFromMediaFolder();
 
-            mediaFileDao.checkpoint();
+            //mediaFileDao.checkpoint();
         }catch (Throwable x) {
             LOG.error("Failed to scan playlists library.", x);
         } finally {

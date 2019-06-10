@@ -88,11 +88,6 @@ public class MusicFolderSettingsController {
         if(scanMissingFiles != null){
             mediaScannerService.scanMissingLibrary();
         }
-        if (scanPlaylistNow != null) {
-            settingsService.clearMusicFolderCache();
-            mediaScannerService.scanPlaylistLibrary();
-        }
-
         if (expunge != null) {
             expunge();
         }
