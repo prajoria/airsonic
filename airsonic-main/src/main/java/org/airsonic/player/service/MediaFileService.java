@@ -144,6 +144,16 @@ public class MediaFileService {
     /**
      * Returns a media file instance for the given path name. If possible, a cached value is returned.
      *
+     * @return A media file instance which is marked missing.
+     * @throws SecurityException If access is denied to the given file.
+     */
+    public List<MediaFile> getAllSongsFile() {
+        return mediaFileDao.getAllSongs();
+    }
+
+    /**
+     * Returns a media file instance for the given path name. If possible, a cached value is returned.
+     *
      * @param pathName A path name for a file on the local file system.
      * @return A media file instance.
      * @throws SecurityException If access is denied to the given file.
@@ -500,6 +510,7 @@ public class MediaFileService {
         return (name.startsWith(".") && !name.startsWith("..")) || name.startsWith("@eaDir") || name.equals("Thumbs.db");
     }
 
+
     private MediaFile createMediaFile(File file) {
 
         MediaFile existingFile = mediaFileDao.getMediaFile(file.getPath());
@@ -650,6 +661,15 @@ public class MediaFileService {
         mediaFile = createMediaFile(mediaFile.getFile());
         mediaFileDao.createOrUpdateMediaFile(mediaFile);
         mediaFileMemoryCache.remove(mediaFile.getFile());
+    }
+
+    public void refreshMediaFileIfInvalid(MediaFile mediaFile) {
+        mediaFile = createMediaFile(mediaFile.getFile());
+        if(mediaFile.getTitle().contains(MetaDataParser.NOT_VALID_FILE)) {
+            LOG.info("Invalid media file " + mediaFile);
+            mediaFileDao.createOrUpdateMediaFile(mediaFile);
+            mediaFileMemoryCache.remove(mediaFile.getFile());
+        }
     }
 
     private void putInMemoryCache(File file, MediaFile mediaFile) {

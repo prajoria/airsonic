@@ -72,6 +72,7 @@ public class AudioBooksSettingsController {
     protected void formBackingObject(@RequestParam(value = "scanNow",required = false) String scanNow,
                                      @RequestParam(value = "scanPlaylistNow",required = false) String scanPlaylistNow,
                                      @RequestParam(value = "scanMissingFiles",required = false) String scanMissingFiles,
+                                     @RequestParam(value = "scanInvalidMediaFiles",required = false) String scanInvalidMediaFiles,
                                      @RequestParam(value = "scanSpotifyPlaylists",required = false) String scanSpotifyPlaylists,
                                        @RequestParam(value = "expunge",required = false) String expunge,
                                        Model model) throws Exception {
@@ -86,6 +87,9 @@ public class AudioBooksSettingsController {
             mediaScannerService.scanPlaylistLibrary();
         }
         if(scanMissingFiles != null){
+            mediaScannerService.scanMissingLibrary();
+        }
+        if(scanInvalidMediaFiles != null){
             mediaScannerService.scanMissingLibrary();
         }
         if (scanPlaylistNow != null) {

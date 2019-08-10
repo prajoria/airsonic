@@ -118,6 +118,12 @@
 
             <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanMissingFiles"/></c:import></td>
         </tr>
+        <tr>
+            <td><div class="forward"><a href="musicFolderSettings.view?scanInvalidMediaFiles">Scan Invalid Files</a></div></td>
+
+            <td><c:import url="helpToolTip.jsp"><c:param name="topic" value="scanInvalidMediaFiles"/></c:import></td>
+        </tr>
+
     </table>
 
     <c:if test="${command.scanning}">
