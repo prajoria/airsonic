@@ -41,6 +41,7 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
+import org.apache.lucene.store.AlreadyClosedException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.NumericUtils;
@@ -130,7 +131,11 @@ public class SearchService {
             }else {
                 artistWriter.addDocument(ARTIST.createDocument(mediaFile));
             }
-        } catch (Exception x) {
+        }catch (AlreadyClosedException x) {
+            LOG.error("Search index already closed, restarting " + mediaFile, x);
+            startIndexing();
+        }
+        catch (Exception x) {
             LOG.error("Failed to create search index for " + mediaFile, x);
         }
     }

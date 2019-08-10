@@ -173,6 +173,38 @@ public class MediaScannerService {
      * Scans the media library.
      * The scanning is done asynchronously, i.e., this method returns immediately.
      */
+    public synchronized void scanInvalidMediaFiles() {
+
+        Thread thread = new Thread("MediaLibraryScanner") {
+            @Override
+            public void run() {
+
+                List<MediaFile> songMediaFiles = mediaFileService.getAllSongsFile();
+                int count = 0;
+                int totalCount = 0;
+                for(MediaFile mediaFile:songMediaFiles){
+                    count++;
+                    totalCount++;
+                    if((count % 500) == 0) {
+                        count = 0;
+                        LOG.info("Medial files validate " + totalCount + "/" + songMediaFiles.size() + ".");
+                    }
+                    File mf = new File(mediaFile.getPath());
+                    if(mf.exists()){
+                        mediaFileService.refreshMediaFileIfInvalid(mediaFile);
+                    }
+                }
+            }
+        };
+
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+    }
+
+    /**
+     * Scans the media library.
+     * The scanning is done asynchronously, i.e., this method returns immediately.
+     */
     public synchronized void scanMissingLibrary() {
 
         Thread thread = new Thread("MediaLibraryScanner") {

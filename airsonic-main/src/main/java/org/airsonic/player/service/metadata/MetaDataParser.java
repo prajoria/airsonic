@@ -36,6 +36,8 @@ import java.util.List;
  */
 public abstract class MetaDataParser {
 
+    public static final String NOT_VALID_FILE = "#NotValidFile#";
+
     /**
      * Parses meta data for the given file.
      *
@@ -52,6 +54,7 @@ public abstract class MetaDataParser {
 
         if (artist == null) {
             artist = guessArtist(file);
+
         }
         if (albumArtist == null) {
             albumArtist = guessArtist(file);
@@ -60,7 +63,7 @@ public abstract class MetaDataParser {
             album = guessAlbum(file, artist);
         }
         if (title == null) {
-            title = guessTitle(file);
+            title = guessTitle(file) + NOT_VALID_FILE;
         }
 
         title = removeTrackNumberFromTitle(title, metaData.getTrackNumber());

@@ -77,6 +77,16 @@ public class MediaFileDao extends AbstractDao {
     }
 
     /**
+     * Returns the music media file for the given ID.
+     *
+     * @return The media filesor null.
+     */
+    public List<MediaFile> getAllSongs() {
+        return query("select " + QUERY_COLUMNS + " from media_file where type in (?,?,?)", rowMapper,
+                MediaFile.MediaType.MUSIC.name(), MediaFile.MediaType.AUDIOBOOK.name(), MediaFile.MediaType.PODCAST.name());
+    }
+
+    /**
      * Returns the media file for the given ID.
      *
      * @param id The ID.
