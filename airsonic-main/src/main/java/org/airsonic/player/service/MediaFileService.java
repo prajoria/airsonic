@@ -215,9 +215,12 @@ public class MediaFileService {
         }
 
         List<MediaFile> result = new ArrayList<MediaFile>();
+        int count = 0;
         for (MediaFile child : mediaFileDao.getChildrenOf(parent.getPath())) {
             child = checkLastModified(child, useFastCache);
             if (child.isDirectory() && includeDirectories) {
+                count++;
+                LOG.info(count + ". Folder found in media library " + parent + "/" + child);
                 result.add(child);
             }
             if (child.isFile() && includeFiles) {

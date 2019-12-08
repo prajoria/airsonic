@@ -351,6 +351,7 @@ public class MediaScannerService {
                 scanFile(child, musicFolder, lastScanned, albumCount, genres, isPodcast);
             }
             for (MediaFile child : mediaFileService.getChildrenOf(file, false, true, false, false)) {
+                LOG.info("Scanning media path " + child);
                 scanFile(child, musicFolder, lastScanned, albumCount, genres, isPodcast);
             }
         } else {
